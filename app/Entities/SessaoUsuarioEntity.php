@@ -39,7 +39,7 @@ class SessaoUsuarioEntity
         return ['status' => true, 'msg' => "Sessão iniciado com sucesso!", 'token' => JwtToken::encodeTokenJwt([
             'tokenUsuario' => $verificaCredenciaisUsuario->fun_token,
             'usuarioNome' => $verificaCredenciaisUsuario->fun_usuario
-        ]), 'admin' => $verificaCredenciaisUsuario->fun_adm];
+        ]), 'admin' => (bool)$verificaCredenciaisUsuario->fun_adm];
     }
 
     public function buscarDadosSessaoUsuario(string $tokenJwt): SessaoUsuarioEntity

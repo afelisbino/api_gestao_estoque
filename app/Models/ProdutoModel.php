@@ -61,6 +61,7 @@ class ProdutoModel extends Model
 
         $this->where('produto.emp_id', $emp_id);
         $this->where('produto.pro_disponivel', 1);
+        $this->where('estoque.est_qtd_atual > 0');
 
         return $this->get()->getResult();
     }

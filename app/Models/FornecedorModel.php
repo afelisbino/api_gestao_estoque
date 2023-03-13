@@ -50,4 +50,11 @@ class FornecedorModel extends Model
 
         return $this->get()->getResult();
     }
+
+    public function buscaFornecedorProdutoEmpresa($empresaId)
+    {
+        $this->where('emp_id', $empresaId);
+
+        return $this->get()->getRow();
+    }
 }

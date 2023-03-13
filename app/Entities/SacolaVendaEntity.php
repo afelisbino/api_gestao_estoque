@@ -5,6 +5,7 @@ namespace App\Entities;
 use App\Libraries\Uuid;
 use App\Models\SacolaModel;
 use App\Models\SacolaVendaModel;
+use App\Models\VendaModel;
 
 class SacolaVendaEntity
 {
@@ -39,6 +40,8 @@ class SacolaVendaEntity
         $vendaEntity = new VendaEntity(ven_id: $vendaId);
         $estoqueEntity = new EstoqueEntity();
 
+        $lucroVenda = 0;
+
         foreach ($itensSacola as $item) {
 
             $produtoEntity->__set('pro_token', $item['pro_id']);
@@ -56,6 +59,12 @@ class SacolaVendaEntity
                 $this->scl_qtd = $item['scl_qtd'];
                 $this->scl_sub_total = $item['scl_sub_total'];
 
+                $buscaCustoProduto = $produtoEntity->buscarDadosProduto($produtoEntity);
+
+                if (!empty($buscaCustoProduto)) {
+                    $lucroVenda += $item['scl_sub_total'] - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd']);
+                }
+
                 $idItemSacola = $this->salvaItemSacola($this);
 
                 $estoqueEntity->__set("produto", $produtoEntity);
@@ -65,6 +74,12 @@ class SacolaVendaEntity
 
                 if (!$this->vinculaItemSacolaVenda($this)) return ['status' => false, 'msg' => "Falha ao vincular o item a venda, tente novamente!"];
             }
+
+            $vendaModel = new VendaModel();
+            $vendaModel->save([
+                'ven_id' => $vendaEntity->__get('ven_id'),
+                'ven_lucro' => $lucroVenda
+            ]);
         }
 
         return ['status' => true, 'msg' => "Venda registrada com sucesso!"];

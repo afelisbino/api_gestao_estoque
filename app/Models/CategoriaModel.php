@@ -52,11 +52,18 @@ class CategoriaModel extends Model
         return $this->get()->getRow();
     }
 
-    public function listarCategoria(string $emp_id)
+    public function listarCategoria(int $emp_id)
     {
         $this->where('emp_id', $emp_id);
         $this->orderBy('cat_nome', 'ASC');
 
         return $this->get()->getResult();
+    }
+
+    public function buscaCategoriaProdutoEmpresaPorNome(string $nomeCategoria, int $empresaId){
+        $this->where('cat_nome', $nomeCategoria);
+        $this->where('emp_id', $empresaId);
+
+        return $this->get()->getRow();
     }
 }

@@ -14,7 +14,7 @@ class VendaModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_tipo_pagamento', 'emp_id'];
+    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_tipo_pagamento', 'ven_lucro', 'emp_id'];
 
     protected $useTimestamps = false;
 
@@ -68,13 +68,7 @@ class VendaModel extends Model
 
         $this->selectSum('ven_total', "ven_valor_total");
         $this->selectSum(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id
-                where sacola_venda.ven_id = venda.ven_id
-            )",
+            "ven_lucro",
             "ven_lucro"
         );
         $this->where('emp_id', $empresaId);
@@ -92,13 +86,7 @@ class VendaModel extends Model
 
         $this->selectSum('ven_total', "ven_valor_total");
         $this->selectSum(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id
-                where sacola_venda.ven_id = venda.ven_id
-            )",
+            "ven_lucro",
             "ven_lucro"
         );
         $this->where('emp_id', $empresaId);
@@ -113,88 +101,87 @@ class VendaModel extends Model
     {
         $this->select("date_format(ven_data, '%Y-%m-%d') as data_venda");
         $this->selectSum('ven_total', "ven_valor_total");
-        $this->select("
-        (
-            SUM(venda.ven_total) - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda
-                join sacola on sacola_venda.scl_id = sacola.scl_id
-                inner join venda as v on sacola_venda.ven_id = v.ven_id
-                join produto on sacola.pro_id = produto.pro_id 
-                where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d')
-                and v.emp_id = venda.emp_id
-                and v.ven_status = 'finalizado'
-                and v.ven_tipo = 'local'
-             ) 
-        ) as ven_valor_lucro
-        ");
-        $this->select("
-        (
-            SELECT SUM(ven_total) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_tipo_pagamento = 'cartao'
-        ) as ven_valor_cartao");
-        $this->select("
-        (
-            SELECT SUM(ven_total) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_tipo_pagamento = 'dinheiro'
-        ) as ven_valor_dinheiro");
-
-        $this->select("(
-            SELECT COUNT(*) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_fiado = 1
-        ) as ven_qtd_fiado");
-
-        $this->select("(
-            SELECT COUNT(*) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_fiado = 0
-        ) as ven_qtd_normal");
-        $this->select("(
-            SELECT COUNT(*) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_tipo_pagamento = 'cartao'
-        ) as ven_qtd_cartao");
-        $this->select("(
-            SELECT COUNT(*) 
-            FROM venda as v 
-            where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d') 
-            and v.emp_id = venda.emp_id
-            and v.ven_status = 'finalizado'
-            and v.ven_tipo = 'local'
-            and v.ven_tipo_pagamento = 'dinheiro'
-        ) as ven_qtd_dinheiro");
+        $this->selectSum('ven_lucro', "ven_valor_lucro");
 
         $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
-        $this->orderBy('ven_data', 'ASC');
+        $this->orderBy('ven_data', 'DESC');
         $this->groupBy("date_format(ven_data, '%Y-%m-%d')");
         $this->limit(7);
 
         return $this->get()->getResult();
+    }
+
+    public function buscaEstatisticasVendasLocalPeriodo($dataInicio, $dataFim, $empresaId)
+    {
+        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "', '%Y-%m-%d') and date_format('" . $dataFim . "', '%Y-%m-%d')";
+
+        $this->select("date_format(ven_data, '%Y-%m-%d') as data_venda");
+        $this->selectSum('ven_total', "ven_valor_total");
+        $this->selectSum('ven_lucro', "ven_valor_lucro");
+
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where($periodoFiltro);
+        
+        $this->orderBy('ven_data', 'DESC');
+        $this->groupBy("date_format(ven_data, '%Y-%m-%d')");
+
+        return $this->get()->getResult();
+    }
+
+    public function buscaEstatisticasVendaFiado($empresaId, $data)
+    {
+        $this->selectCount('*', "ven_qtd_fiado");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_fiado', '1');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
+    }
+
+    public function buscaEstatisticasVendaNormal($empresaId, $data)
+    {
+        $this->selectCount('*', "ven_qtd_normal");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_fiado', '0');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
+    }
+
+    public function buscaEstatisticasVendaCartao($empresaId, $data)
+    {
+
+        $this->selectSum('ven_total', "ven_valor_cartao");
+        $this->selectCount('*', "ven_qtd_cartao");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_tipo_pagamento', 'cartao');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
+    }
+
+    public function buscaEstatisticasVendaDinheiro($empresaId, $data)
+    {
+
+        $this->selectSum('ven_total', "ven_valor_dinheiro");
+        $this->selectCount('*', "ven_qtd_dinheiro");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_tipo_pagamento', 'dinheiro');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
     }
 
     public function buscaListaVendasLocalFinalizadaEmpresaPorPeriodo($dataInicio, $dataFim, $empresaId)
@@ -202,14 +189,9 @@ class VendaModel extends Model
         $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "', '%Y-%m-%d') and date_format('" . $dataFim . "', '%Y-%m-%d')";
 
         $this->select();
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id
-                where sacola_venda.ven_id = venda.ven_id
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
@@ -226,15 +208,9 @@ class VendaModel extends Model
         $periodoFiltro = "date_format(ven_data, '%Y-%m') between date_format('" . $mesAnoInicio . "', '%Y-%m') and date_format('" . $mesAnoFim . "', '%Y-%m')";
 
         $this->select("date_format(ven_data, '%Y-%m') as ven_mes");
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id 
-                inner join venda as v on sacola_venda.ven_id = v.ven_id 
-                where date_format(v.ven_data, '%Y-%m') = date_format(venda.ven_data, '%Y-%m')
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->selectSum("venda.ven_total", 'ven_receita');
 
@@ -253,16 +229,9 @@ class VendaModel extends Model
         $periodoFiltro = "date_format(ven_data, '%Y') between " . $anoInicio . " and " . $anoFim;
 
         $this->select("date_format(ven_data, '%Y') as ven_ano");
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id 
-                inner join venda as v on sacola_venda.ven_id = v.ven_id 
-                where date_format(v.ven_data, '%Y') = date_format(venda.ven_data, '%Y')
-                and v.emp_id = {$empresaId}
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->selectSum("venda.ven_total", 'ven_receita');
 
@@ -285,16 +254,9 @@ class VendaModel extends Model
         }
 
         $this->select("date_format(ven_data, '%Y-%m-%d') as ven_data_periodo");
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id 
-                inner join venda as v on sacola_venda.ven_id = v.ven_id 
-                where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d')
-                and v.emp_id = {$empresaId}
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->selectSum("venda.ven_total", 'ven_receita');
 
@@ -312,16 +274,9 @@ class VendaModel extends Model
     {
         $periodoFiltro = "date_format(ven_data, '%Y-%m') between date_format('" . $mesAnoInicio . "', '%Y-%m') and date_format('" . $mesAnoFim . "', '%Y-%m')";
 
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id 
-                inner join venda as v on sacola_venda.ven_id = v.ven_id 
-                where date_format(v.ven_data, '%Y-%m') = date_format(venda.ven_data, '%Y-%m')
-                and v.emp_id = {$empresaId}
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->selectSum("venda.ven_total", 'ven_receita');
 
@@ -336,8 +291,9 @@ class VendaModel extends Model
     {
         $periodoFiltro = "date_format(venda.ven_data, '%Y') between " . $anoInicio . " and " . $anoFim;
 
-        $this->select(
-            "venda.ven_total - (SELECT SUM(produto.pro_preco_custo) FROM sacola_venda inner join sacola on sacola_venda.scl_id = sacola.scl_id join produto on sacola.pro_id = produto.pro_id inner join venda as v on sacola_venda.ven_id = v.ven_id where date_format(v.ven_data, '%Y') = date_format(venda.ven_data, '%Y') and v.emp_id = {$empresaId}) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
 
         $this->selectSum("venda.ven_total", 'ven_receita');
@@ -357,22 +313,23 @@ class VendaModel extends Model
             $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "', '%Y-%m-%d') and date_format('" . $dataFim . "', '%Y-%m-%d')";
         }
 
-        $this->select(
-            "venda.ven_total - (
-                SELECT SUM(produto.pro_preco_custo) 
-                FROM sacola_venda 
-                inner join sacola on sacola_venda.scl_id = sacola.scl_id 
-                join produto on sacola.pro_id = produto.pro_id 
-                inner join venda as v on sacola_venda.ven_id = v.ven_id 
-                where date_format(v.ven_data, '%Y-%m-%d') = date_format(venda.ven_data, '%Y-%m-%d')
-                and v.emp_id = {$empresaId}
-            ) as ven_lucro"
+        $this->selectSum(
+            "ven_lucro",
+            "ven_lucro"
         );
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');
         $this->where('emp_id', $empresaId);
         $this->where($periodoFiltro);
+
+        return $this->get()->getRow();
+    }
+
+    public function verificaVendaExistenteEmpresa(string $datHoraVenda, int $empresaId)
+    {
+        $this->where('ven_data', $datHoraVenda);
+        $this->where('emp_id', $empresaId);
 
         return $this->get()->getRow();
     }

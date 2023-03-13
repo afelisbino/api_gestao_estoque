@@ -35,14 +35,16 @@ $routes->setAutoRoute(false);
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
-$routes->group('empresa', static function ($routes) {
-    $routes->post('novo', 'EmpresaController::cadastrarNovaEmpresa');
-    $routes->group('usuario', static function ($routes) {
-        $routes->post('primeiro', 'UsuarioController::cadastrarPrimeiroUsuarioEmpresa');
-    });
-});
+
 
 $routes->group('api', static function ($routes) {
+    $routes->group('empresa', static function ($routes) {
+        $routes->post('novo', 'EmpresaController::cadastrarNovaEmpresa');
+        $routes->group('usuario', static function ($routes) {
+            $routes->post('primeiro', 'UsuarioController::cadastrarPrimeiroUsuarioEmpresa');
+        });
+    });
+
     $routes->group('usuario', static function ($routes) {
         $routes->group('autenticacao', static function ($routes) {
             $routes->post('login', 'AutenticacaoController::autenticarUsuario');
@@ -144,6 +146,13 @@ $routes->group('api', static function ($routes) {
             $routes->get('mensal', "RelatorioController::buscaEstatisticasCaixaEmpresaMensal", ['filter' => 'auth']);
             $routes->get('anual', "RelatorioController::buscaEstatisticasCaixaEmpresaAnual", ['filter' => 'auth']);
         });
+    });
+
+    $routes->group('importacao', static function ($routes) {
+        $routes->post('categoria', 'ImportacaoDadosController::importaCategorias', ['filter' => 'auth']);
+        $routes->post('fornecedor', 'ImportacaoDadosController::importaFornecedores', ['filter' => 'auth']);
+        $routes->post('produto', 'ImportacaoDadosController::importaProdutos', ['filter' => 'auth']);
+        $routes->post('venda', 'ImportacaoDadosController::importaVendas', ['filter' => 'auth']);
     });
 });
 

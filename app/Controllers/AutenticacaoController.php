@@ -27,33 +27,16 @@ class AutenticacaoController extends BaseController
      */
     public function autenticarUsuario(): ResponseInterface
     {
-        $usuarioNome = $this->request?->getPost('usuarioNome');
-        $usuarioSenha = $this->request?->getPost('usuarioSenha');
+        $dadosLogin = $this->request?->getPost();
 
-        if (empty($usuarioNome)) return $this->response->setStatusCode(200, 'Usuario não informado')->setJSON(['status' => false, 'msg' => 'Usuario não informado!']);
+        if (empty($dadosLogin['usuarioNome'])) return $this->response->setStatusCode(200, 'Usuario não informado')->setJSON(['status' => false, 'msg' => 'Usuario não informado!']);
 
-        if (empty($usuarioSenha)) return $this->response->setStatusCode(200, 'Senha não informado')->setJSON(['status' => false, 'msg' => 'Senha do usuario não informado!']);
+        if (empty($dadosLogin['usuarioSenha'])) return $this->response->setStatusCode(200, 'Senha não informado')->setJSON(['status' => false, 'msg' => 'Senha do usuario não informado!']);
 
         $sessaoEntity = new SessaoUsuarioEntity(
-            new UsuarioEntity(fun_usuario: $usuarioNome, fun_senha: $usuarioSenha)
+            new UsuarioEntity(fun_usuario: $dadosLogin['usuarioNome'], fun_senha: $dadosLogin['usuarioSenha'])
         );
 
         return $this->response->setStatusCode(200, "Sucesso")->setJSON($sessaoEntity->realizarLoginUsuario($sessaoEntity));
-    }
-
-    /**
-     * @param tokenSessao string
-     */
-    public function desautenticarUsuario(): ResponseInterface
-    {
-        $tokenSessao = $this->request?->getRawInput();
-
-        if (!isset($tokenSessao['tokenSessao']) || empty($tokenSessao['tokenSessao'])) return $this->response->setStatusCode(200, 'Token não informado!')->setJSON(['status' => false, 'msg' => "Token da sessão não informado!"]);
-
-        $sessaoEntity = new SessaoUsuarioEntity(
-            sus_token: $tokenSessao['tokenSessao']
-        );
-
-        return $this->response->setStatusCode(200, "Sucesso")->setJSON($sessaoEntity->realizarLogoffUsuario($sessaoEntity));
     }
 }

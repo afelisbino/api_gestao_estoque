@@ -58,6 +58,7 @@ class MovimentacaoCaixaController extends BaseController
             mcx_tipo: $dadosMovimentacao->mcxTipo,
             mcx_comentario: $dadosMovimentacao->mcxComentario,
             mcx_valor: $dadosMovimentacao->mcxValor,
+            mcx_data: $dadosMovimentacao->mcxData,
             empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')
         );
 

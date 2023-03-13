@@ -81,6 +81,7 @@ class CaixaEntity
 
                     $index++;
                 }
+                break;
             case 'anual':
                 foreach ($dadosReceitaEmpresa as $receita) {
                     $dateTime = Time::parse($receita->ven_ano, "America/Sao_Paulo");
@@ -111,30 +112,36 @@ class CaixaEntity
         $movimentacaoCaixaModel = new MovimentacaoCaixaModel();
 
         $dadosReceitaEmpresa = null;
-        $dadosMovimentacoesCaixaEmpresa = null;
 
         switch ($tipoFiltro) {
             case 'periodo':
                 $dadosReceitaEmpresa = $vendaModel->buscaValoresLucroReceitaVendasFinalizadasPeriodo($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaMovimentacoesCaixaPeriodo($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
                 break;
             case 'mensal':
                 $dadosReceitaEmpresa = $vendaModel->buscaValoresLucroReceitaVendasFinalizadasMensal($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaMovimentacoesCaixaMensal($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
                 break;
             case 'anual':
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaMovimentacoesCaixaAnual($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
                 $dadosReceitaEmpresa = $vendaModel->buscaValoresLucroReceitaVendasFinalizadasAnual($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
                 break;
         }
 
+        $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaListaMovimentacoesCaixa($tipoFiltro, $filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
+
         if (empty($dadosMovimentacoesCaixaEmpresa) && empty($dadosReceitaEmpresa)) return [];
+
+        $valorEntradaCaixa = 0;
+        $valorSaidaCaixa = 0;
+
+        foreach ($dadosMovimentacoesCaixaEmpresa as $movimentacao) {
+            $valorEntradaCaixa += $movimentacao->mcx_entrada;
+            $valorSaidaCaixa += $movimentacao->mcx_saida;
+        }
 
         return [
             'valorTotalReceita' => empty($dadosReceitaEmpresa->ven_receita) ? 0 : $dadosReceitaEmpresa->ven_receita,
             'valorTotalLucro' => empty($dadosReceitaEmpresa->ven_lucro) ? 0 : $dadosReceitaEmpresa->ven_lucro,
-            'valorTotalEntrada' => empty($dadosMovimentacoesCaixaEmpresa->mcx_entrada) ? 0 : $dadosMovimentacoesCaixaEmpresa->mcx_entrada,
-            'valorTotalSaida' => empty($dadosMovimentacoesCaixaEmpresa->mcx_saida) ? 0 : $dadosMovimentacoesCaixaEmpresa->mcx_saida
+            'valorTotalEntrada' => $valorEntradaCaixa,
+            'valorTotalSaida' => $valorSaidaCaixa
         ];
     }
 
@@ -206,28 +213,32 @@ class CaixaEntity
         $estatisticasMovimentacao = [];
         $index = 0;
 
+        $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaListaMovimentacoesCaixa($tipoFiltro, $filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
+
         switch ($tipoFiltro) {
             case 'periodo':
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaListaMovimentacoesCaixaPeriodo($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
+
 
                 foreach ($dadosMovimentacoesCaixaEmpresa as $movimentacao) {
-                    $dateTime = Time::parse($movimentacao->mcx_data, "America/Sao_Paulo");
+                    $dateTime = Time::parse($movimentacao->mcx_periodo_movimentacao, "America/Sao_Paulo");
 
                     $estatisticasMovimentacao[$index]['data'] = $dateTime->toLocalizedString('dd/MM/YYYY');
+
                     $estatisticasMovimentacao[$index]['valorEntrada'] = $movimentacao->mcx_entrada;
                     $estatisticasMovimentacao[$index]['valorSaida'] = $movimentacao->mcx_saida;
+
 
                     $index++;
                 }
 
                 break;
             case 'mensal':
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaListaMovimentacoesCaixaMensal($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
 
                 foreach ($dadosMovimentacoesCaixaEmpresa as $movimentacao) {
-                    $dateTime = Time::parse($movimentacao->mcx_mes, "America/Sao_Paulo");
+                    $dateTime = Time::parse($movimentacao->mcx_periodo_movimentacao, "America/Sao_Paulo");
 
                     $estatisticasMovimentacao[$index]['data'] = $dateTime->toLocalizedString('MM/YYYY');
+
                     $estatisticasMovimentacao[$index]['valorEntrada'] = $movimentacao->mcx_entrada;
                     $estatisticasMovimentacao[$index]['valorSaida'] = $movimentacao->mcx_saida;
 
@@ -235,10 +246,9 @@ class CaixaEntity
                 }
                 break;
             case 'anual':
-                $dadosMovimentacoesCaixaEmpresa = $movimentacaoCaixaModel->buscaListaMovimentacoesCaixaAnual($filtroInicio, $filtroFim, $empresaEntity->__get('emp_id'));
 
                 foreach ($dadosMovimentacoesCaixaEmpresa as $movimentacao) {
-                    $dateTime = Time::parse($movimentacao->mcx_ano, "America/Sao_Paulo");
+                    $dateTime = Time::parse($movimentacao->mcx_periodo_movimentacao, "America/Sao_Paulo");
 
                     $estatisticasMovimentacao[$index]['data'] = $dateTime->toLocalizedString('YYYY');
                     $estatisticasMovimentacao[$index]['valorEntrada'] = $movimentacao->mcx_entrada;
