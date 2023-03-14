@@ -197,7 +197,7 @@ class ProdutoController extends BaseController
         $tokenProduto = $this->request?->getPost('tokenProduto');
         $codigoBarrasProduto = $this->request?->getPost('codigoBarrasProduto');
 
-        $codigoBarraProdutoEntity = new CodigoBarrasProdutoEntity(pcb_codigo: $codigoBarrasProduto, produto: new ProdutoEntity(pro_token: $tokenProduto));
+        $codigoBarraProdutoEntity = new CodigoBarrasProdutoEntity(pcb_codigo: $codigoBarrasProduto, produto: new ProdutoEntity(pro_token: $tokenProduto, empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')));
 
         return $this->response->setStatusCode(200, "Sucesso")->setJSON($codigoBarraProdutoEntity->cadastrarCodigoBarrasProduto($codigoBarraProdutoEntity));
     }
