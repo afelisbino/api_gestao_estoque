@@ -25,8 +25,8 @@ class EmpresaController extends BaseController
     public function cadastrarNovaEmpresa(): ResponseInterface
     {
 
-        $nomeEmpresa = $this->request?->getPost('nomeEmpresa');
-        $documentoEmpresa = $this->request?->getPost('documentoEmpresa');
+        $nomeEmpresa = $this->request?->getJsonVar('nomeEmpresa');
+        $documentoEmpresa = $this->request?->getJsonVar('documentoEmpresa');
 
         if (empty($nomeEmpresa)) {
             return $this->response->setStatusCode(200, "Informação não enviado!")->setJSON(['status' => false, 'msg' => "Nome da empresa não informado!"]);

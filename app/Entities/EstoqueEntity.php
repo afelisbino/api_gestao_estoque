@@ -110,7 +110,7 @@ class EstoqueEntity
             $dateTime = Time::parse($historico->hsp_data, "America/Sao_Paulo");
 
             $historicoEstoque[$index]['hsp_tipo'] = ucfirst($historico->hsp_tipo);
-            $historicoEstoque[$index]['pro_nome'] = ucwords($historico->pro_nome);
+            $historicoEstoque[$index]['pro_nome'] = ucfirst($historico->pro_nome);
             $historicoEstoque[$index]['hsp_data'] = $dateTime->toLocalizedString('dd/MM/YYYY HH:mm');
             $historicoEstoque[$index]['hsp_antigo'] = $historico->hsp_qtd_antigo;
             $historicoEstoque[$index]['hsp_movimentado'] = $historico->hsp_qtd_registro;
@@ -222,7 +222,7 @@ class EstoqueEntity
 
         foreach ($dadosEstoque as $produto) {
             $estoqueEmpresa[$index]['pro_id'] = $produto->pro_token;
-            $estoqueEmpresa[$index]['pro_nome'] = ucwords($produto->pro_nome);
+            $estoqueEmpresa[$index]['pro_nome'] = ucfirst($produto->pro_nome);
             $estoqueEmpresa[$index]['pro_qtd_atual'] = (int) $produto->est_qtd_atual;
             $estoqueEmpresa[$index]['pro_qtd_minimo'] = (int) $produto->est_qtd_minimo;
             $estoqueEmpresa[$index]['pro_disponivel'] = (bool) $produto->pro_disponivel;

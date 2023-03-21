@@ -31,7 +31,7 @@ class CategoriaController extends BaseController
      */
     public function cadastrarCategoria(): ResponseInterface
     {
-        $nomeCategoria = $this->request?->getPost('nomeCategoria');
+        $nomeCategoria = $this->request?->getJsonVar('nomeCategoria');
 
         if (!$this->validateData(['nomeCategoria' => $nomeCategoria], [
             'nomeCategoria' => 'required|string',
