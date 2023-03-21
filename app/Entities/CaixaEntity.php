@@ -140,6 +140,7 @@ class CaixaEntity
         return [
             'valorTotalReceita' => empty($dadosReceitaEmpresa->ven_receita) ? 0 : $dadosReceitaEmpresa->ven_receita,
             'valorTotalLucro' => empty($dadosReceitaEmpresa->ven_lucro) ? 0 : $dadosReceitaEmpresa->ven_lucro,
+            'porcentagemTotalLucro' => empty($dadosReceitaEmpresa->ven_porcentagem_lucro) ? 0 : $dadosReceitaEmpresa->ven_porcentagem_lucro,
             'valorTotalEntrada' => $valorEntradaCaixa,
             'valorTotalSaida' => $valorSaidaCaixa
         ];
@@ -165,6 +166,7 @@ class CaixaEntity
                     $estatisticasReceitaLucro[$index]['data'] = $dateTime->toLocalizedString('dd/MM/YYYY');
                     $estatisticasReceitaLucro[$index]['valorReceita'] = $valores->ven_receita;
                     $estatisticasReceitaLucro[$index]['valorLucro'] = $valores->ven_lucro;
+                    $estatisticasReceitaLucro[$index]['porcetagemLucro'] = $valores->ven_porcentagem_lucro;
 
                     $index++;
                 }
@@ -181,6 +183,7 @@ class CaixaEntity
                     $estatisticasReceitaLucro[$index]['data'] = $dateTime->toLocalizedString('MM/YYYY');
                     $estatisticasReceitaLucro[$index]['valorReceita'] = $valores->ven_receita;
                     $estatisticasReceitaLucro[$index]['valorLucro'] = $valores->ven_lucro;
+                    $estatisticasReceitaLucro[$index]['porcetagemLucro'] = $valores->ven_porcentagem_lucro;
 
                     $index++;
                 }
@@ -196,6 +199,7 @@ class CaixaEntity
                     $estatisticasReceitaLucro[$index]['data'] = $dateTime->toLocalizedString('YYYY');
                     $estatisticasReceitaLucro[$index]['valorReceita'] = $valores->ven_receita;
                     $estatisticasReceitaLucro[$index]['valorLucro'] = $valores->ven_lucro;
+                    $estatisticasReceitaLucro[$index]['porcetagemLucro'] = $valores->ven_porcentagem_lucro;
 
                     $index++;
                 }
