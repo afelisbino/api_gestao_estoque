@@ -98,10 +98,11 @@ class ProdutoEntity
 
         $dados = [
             'pro_token' => Uuid::v4(),
-            'pro_nome' => $produtoEntity->__get('pro_nome'),
+            'pro_nome' => strtolower($produtoEntity->__get('pro_nome')),
             'pro_descricao' => $produtoEntity->__get('pro_descricao'),
             'pro_valor_venda' => $produtoEntity->__get('pro_valor_venda'),
             'pro_preco_custo' => $produtoEntity->__get('pro_preco_custo'),
+
             'cat_id' => $dadosCategoria->cat_id,
             'frn_id' => $dadosFornecedor->frn_id,
             'emp_id' => $produtoEntity->__get('empresa')->__get('emp_id')
@@ -124,7 +125,7 @@ class ProdutoEntity
 
         foreach ($listaProdutos as $produto) {
             $produtos[$index]['pro_id'] = $produto->pro_token;
-            $produtos[$index]['pro_nome'] = $produto->pro_nome;
+            $produtos[$index]['pro_nome'] = ucfirst($produto->pro_nome);
             $produtos[$index]['pro_descricao'] = $produto->pro_descricao;
             $produtos[$index]['pro_disponivel'] = (bool) $produto->pro_disponivel;
             $produtos[$index]['pro_valor_venda'] = $produto->pro_valor_venda;
@@ -142,8 +143,6 @@ class ProdutoEntity
 
     public function alterarDadosProduto(ProdutoEntity $produtoEntity): array
     {
-
-        if (!Uuid::v4($produtoEntity->__get('pro_token'))) return ['status' => false, 'msg' => 'Token do produto inválido'];
 
         $this->validacao = Services::validation();
 
@@ -194,6 +193,8 @@ class ProdutoEntity
             return ['status' => false, 'msg' => "Erro ao processar o cadastro, necessita enviar as informações dos campos corretamente!"];
         }
 
+        if (!Uuid::v4($produtoEntity->__get('pro_token'))) return ['status' => false, 'msg' => 'Token do produto inválido'];
+
         $categoriaModel = new CategoriaModel();
 
         $dadosCategoria = $categoriaModel->buscarCategoriaPorToken($produtoEntity->__get('categoria')->__get('cat_token'));
@@ -218,7 +219,7 @@ class ProdutoEntity
 
         $dados = [
             'pro_id' => $dadosProduto->pro_id,
-            'pro_nome' => $produtoEntity->__get('pro_nome'),
+            'pro_nome' => strtolower($produtoEntity->__get('pro_nome')),
             'pro_descricao' => $produtoEntity->__get('pro_descricao'),
             'pro_valor_venda' => $produtoEntity->__get('pro_valor_venda'),
             'pro_preco_custo' => $produtoEntity->__get('pro_preco_custo'),
@@ -240,7 +241,7 @@ class ProdutoEntity
 
         return empty($recuperaDadosProduto) ? [] : [
             'pro_id' => $recuperaDadosProduto->pro_token,
-            'pro_nome' => $recuperaDadosProduto->pro_nome,
+            'pro_nome' => ucfirst($recuperaDadosProduto->pro_nome),
             'pro_descricao' => $recuperaDadosProduto->pro_descricao,
             'pro_disponivel' => (bool) $recuperaDadosProduto->pro_disponivel,
             'pro_valor_venda' => $recuperaDadosProduto->pro_valor_venda,
@@ -281,7 +282,7 @@ class ProdutoEntity
 
         foreach ($listaProdutosAtivosEmpresa as $produtos) {
             $listaProdutos[$index]['pro_id'] = $produtos->pro_token;
-            $listaProdutos[$index]['pro_nome'] = $produtos->pro_nome;
+            $listaProdutos[$index]['pro_nome'] = ucfirst($produtos->pro_nome);
             $listaProdutos[$index]['pro_valor'] = $produtos->pro_valor_venda;
             $listaProdutos[$index]['cat_token'] = $produtos->cat_token;
             $listaProdutos[$index]['frn_token'] = $produtos->frn_token;
