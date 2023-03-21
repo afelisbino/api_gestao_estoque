@@ -26,10 +26,10 @@ class UsuarioController extends BaseController
     public function cadastrarPrimeiroUsuarioEmpresa(): ResponseInterface
     {
 
-        $pessoaNome = $this->request?->getPost('pessoaNome');
-        $usuarioNome = $this->request?->getPost('usuarioNome');
-        $usuarioSenha = $this->request?->getPost('usuarioSenha');
-        $empresaToken = $this->request?->getPost('empresaToken');
+        $pessoaNome = $this->request?->getJsonVar('pessoaNome');
+        $usuarioNome = $this->request?->getJsonVar('usuarioNome');
+        $usuarioSenha = $this->request?->getJsonVar('usuarioSenha');
+        $empresaToken = $this->request?->getJsonVar('empresaToken');
 
         if (empty($pessoaNome)) {
             return $this->response->setStatusCode(200, "Informação não enviado!")->setJSON(['status' => false, 'msg' => "Nome da pessoa não informado!"]);
