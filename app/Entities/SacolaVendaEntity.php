@@ -82,7 +82,7 @@ class SacolaVendaEntity
             $vendaModel->save([
                 'ven_id' => $vendaEntity->__get('ven_id'),
                 'ven_lucro' => $valorLucroVenda,
-                'ven_margem_lucro' => ($porcentagemLucroVenda > 0) ? ($porcentagemLucroVenda * 100) : 0
+                'ven_margem_lucro' => ($porcentagemLucroVenda > 0) ? ($porcentagemLucroVenda) : 0
             ]);
         }
 
