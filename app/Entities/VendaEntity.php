@@ -55,7 +55,7 @@ class VendaEntity
 
         $sacolaVendaEntity = new SacolaVendaEntity();
 
-        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $idVenda);
+        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $dadosVenda['vendaValorDesconto'], $idVenda);
 
         return $adicionaItensSacolaVenda;
     }
@@ -81,7 +81,7 @@ class VendaEntity
 
         $sacolaVendaEntity = new SacolaVendaEntity();
 
-        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $idVenda);
+        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $dadosVenda['vendaValorDesconto'], $idVenda);
 
         return $adicionaItensSacolaVenda;
     }
