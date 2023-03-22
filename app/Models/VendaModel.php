@@ -14,7 +14,7 @@ class VendaModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_tipo_pagamento', 'ven_lucro', 'emp_id'];
+    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_tipo_pagamento', 'ven_lucro', 'ven_margem_lucro', 'emp_id'];
 
     protected $useTimestamps = false;
 
@@ -71,6 +71,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
@@ -89,6 +90,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
@@ -102,6 +104,7 @@ class VendaModel extends Model
         $this->select("date_format(ven_data, '%Y-%m-%d') as data_venda");
         $this->selectSum('ven_total', "ven_valor_total");
         $this->selectSum('ven_lucro', "ven_valor_lucro");
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
 
         $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
@@ -120,12 +123,13 @@ class VendaModel extends Model
         $this->select("date_format(ven_data, '%Y-%m-%d') as data_venda");
         $this->selectSum('ven_total', "ven_valor_total");
         $this->selectSum('ven_lucro', "ven_valor_lucro");
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
 
         $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
         $this->where($periodoFiltro);
-        
+
         $this->orderBy('ven_data', 'DESC');
         $this->groupBy("date_format(ven_data, '%Y-%m-%d')");
 
@@ -184,6 +188,20 @@ class VendaModel extends Model
         return $this->get()->getRow();
     }
 
+    public function buscaEstatisticasVendaPix($empresaId, $data)
+    {
+
+        $this->selectSum('ven_total', "ven_valor_pix");
+        $this->selectCount('*', "ven_qtd_pix");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_tipo_pagamento', 'pix');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
+    }
+
     public function buscaListaVendasLocalFinalizadaEmpresaPorPeriodo($dataInicio, $dataFim, $empresaId)
     {
         $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "', '%Y-%m-%d') and date_format('" . $dataFim . "', '%Y-%m-%d')";
@@ -193,6 +211,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
         $this->where('emp_id', $empresaId);
@@ -212,6 +231,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');
@@ -233,6 +253,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');
@@ -258,6 +279,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');
@@ -278,6 +300,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');
@@ -295,6 +318,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
 
         $this->selectSum("venda.ven_total", 'ven_receita');
 
@@ -317,6 +341,7 @@ class VendaModel extends Model
             "ven_lucro",
             "ven_lucro"
         );
+        $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
         $this->selectSum("venda.ven_total", 'ven_receita');
 
         $this->where('ven_status', 'finalizado');

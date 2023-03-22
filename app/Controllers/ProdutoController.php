@@ -40,7 +40,7 @@ class ProdutoController extends BaseController
      */
     public function cadastrarProduto(): ResponseInterface
     {
-        $dadosProdutoEstoque = $this->request?->getJSON(true);
+        $dadosProdutoEstoque = $this->request?->getJSON(assoc: true);
 
         $produtoEntity = new ProdutoEntity(
             pro_nome: $dadosProdutoEstoque['nomeProduto'],
@@ -114,22 +114,22 @@ class ProdutoController extends BaseController
      */
     public function alterarDadosProduto(): ResponseInterface
     {
-        $dadosProdutoEstoque = $this->request?->getJSON(true);
+        $dadosProdutoEstoque = $this->request?->getJSON();
 
         $produtoEntity = new ProdutoEntity(
-            pro_token: $dadosProdutoEstoque['tokenProduto'],
-            pro_nome: $dadosProdutoEstoque['nomeProduto'],
-            pro_valor_venda: $dadosProdutoEstoque['precoVendaProduto'],
-            pro_preco_custo: $dadosProdutoEstoque['precoCompraProduto'],
-            pro_descricao: $dadosProdutoEstoque['descricaoProduto'],
-            categoria: new CategoriaEntity(cat_token: $dadosProdutoEstoque['tokenCategoria']),
-            fornecedor: new FornecedorEntity(frn_token: $dadosProdutoEstoque['tokenFornecedor']),
+            pro_token: $dadosProdutoEstoque->tokenProduto,
+            pro_nome: $dadosProdutoEstoque->nomeProduto,
+            pro_valor_venda: $dadosProdutoEstoque->precoVendaProduto,
+            pro_preco_custo: $dadosProdutoEstoque->precoCompraProduto,
+            pro_descricao: $dadosProdutoEstoque->descricaoProduto,
+            categoria: new CategoriaEntity(cat_token: $dadosProdutoEstoque->tokenCategoria),
+            fornecedor: new FornecedorEntity(frn_token: $dadosProdutoEstoque->tokenFornecedor),
             empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')
         );
 
         $alteraDadosProduto = $produtoEntity->alterarDadosProduto($produtoEntity);
 
-        $estoqueEntity = new EstoqueEntity(est_qtd_atual: $dadosProdutoEstoque['estoqueAtualProduto'], est_qtd_minimo: $dadosProdutoEstoque['estoqueMinimoProduto'], produto: $produtoEntity);
+        $estoqueEntity = new EstoqueEntity(est_qtd_atual: $dadosProdutoEstoque->estoqueAtualProduto, est_qtd_minimo: $dadosProdutoEstoque->estoqueMinimoProduto, produto: $produtoEntity);
 
         $alteraDadosEstoque = $estoqueEntity->alterarDadosEstoqueProduto($estoqueEntity);
 
@@ -194,8 +194,8 @@ class ProdutoController extends BaseController
      */
     public function adicionarCodigoBarrasProduto(): ResponseInterface
     {
-        $tokenProduto = $this->request?->getPost('tokenProduto');
-        $codigoBarrasProduto = $this->request?->getPost('codigoBarrasProduto');
+        $tokenProduto = $this->request?->getJsonVar('tokenProduto');
+        $codigoBarrasProduto = $this->request?->getJsonVar('codigoBarrasProduto');
 
         $codigoBarraProdutoEntity = new CodigoBarrasProdutoEntity(pcb_codigo: $codigoBarrasProduto, produto: new ProdutoEntity(pro_token: $tokenProduto, empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')));
 

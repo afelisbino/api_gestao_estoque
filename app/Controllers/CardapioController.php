@@ -34,10 +34,10 @@ class CardapioController extends BaseController
      */
     public function cadastrarProdutoCardapio(): ResponseInterface
     {
-        $nomeProduto = $this->request?->getPost('nomeProduto');
-        $descricaoProduto = $this->request?->getPost('descricaoProduto');
-        $valorProduto = $this->request?->getPost('valorProduto');
-        $tokenCategoria = $this->request?->getPost('tokenCategoria');
+        $nomeProduto = $this->request?->getJsonVar('nomeProduto');
+        $descricaoProduto = $this->request?->getJsonVar('descricaoProduto');
+        $valorProduto = $this->request?->getJsonVar('valorProduto');
+        $tokenCategoria = $this->request?->getJsonVar('tokenCategoria');
 
         $cardapioEntity = new CardapioEntity(
             cdp_nome: $nomeProduto,

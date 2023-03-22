@@ -55,7 +55,7 @@ class VendaEntity
 
         $sacolaVendaEntity = new SacolaVendaEntity();
 
-        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $idVenda);
+        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $dadosVenda['vendaValorDesconto'], $idVenda);
 
         return $adicionaItensSacolaVenda;
     }
@@ -81,7 +81,7 @@ class VendaEntity
 
         $sacolaVendaEntity = new SacolaVendaEntity();
 
-        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $idVenda);
+        $adicionaItensSacolaVenda = $sacolaVendaEntity->adicionaItemSacolaVenda($dadosVenda['itens'], $dadosVenda['vendaValorDesconto'], $idVenda);
 
         return $adicionaItensSacolaVenda;
     }
@@ -122,7 +122,8 @@ class VendaEntity
         if ($vendaModel->save([
             'ven_status' => 'finalizado',
             'ven_data' => date('Y-m-d H:i:s'),
-            'ven_id' => $dadosVenda->ven_id
+            'ven_id' => $dadosVenda->ven_id,
+            'ven_tipo_pagamento' => $vendaEntity->__get('ven_tipo_pagamento')
         ])) return ['status' => true, 'msg' => "Venda fiado pago com sucesso!"];
 
         return ['status' => false, 'msg' => "Falha ao pagar venda, tente novamente"];
@@ -140,6 +141,7 @@ class VendaEntity
             'qtdTotalVendas' => (int) $quantidadeVendas->ven_quantidade,
             'valorTotalVendas' => (float) $valoresEstatisticasVendas->ven_valor_total,
             'valorTotalLucro' => (float) $valoresEstatisticasVendas->ven_lucro,
+            'porcentagemTotalLucro' => (float) $valoresEstatisticasVendas->ven_porcentagem_lucro
         ];
     }
 
@@ -155,6 +157,7 @@ class VendaEntity
             'qtdTotalVendas' => (int) $quantidadeVendas->ven_quantidade,
             'valorTotalVendas' => (float) $valoresEstatisticasVendas->ven_valor_total,
             'valorTotalLucro' => (float) $valoresEstatisticasVendas->ven_lucro,
+            'porcentagemTotalLucro' => (float) $valoresEstatisticasVendas->ven_porcentagem_lucro,
             'estatisticasVenda' => $this->recuperaEstatisticasVendasLocalEmpresaPorPeriodo($empresaEntity, $dataInicio, $dataFim)
         ];
     }
@@ -173,6 +176,7 @@ class VendaEntity
 
             $estatisticaVendaCartao = $vendaModel->buscaEstatisticasVendaCartao($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaDinheiro = $vendaModel->buscaEstatisticasVendaDinheiro($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
+            $estatisticaVendaPix = $vendaModel->buscaEstatisticasVendaPix($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaNormal = $vendaModel->buscaEstatisticasVendaNormal($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaFiado = $vendaModel->buscaEstatisticasVendaFiado($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
 
@@ -181,7 +185,9 @@ class VendaEntity
             $estatisticaVendas[$index]['valorTotalGanhos'] = $valoresVendas->ven_valor_lucro;
             $estatisticaVendas[$index]['valorTotalCartao'] = $estatisticaVendaCartao->ven_valor_cartao;
             $estatisticaVendas[$index]['valorTotalDinheiro'] = $estatisticaVendaDinheiro->ven_valor_dinheiro;
+            $estatisticaVendas[$index]['valorTotalPix'] = $estatisticaVendaPix->ven_valor_pix;
             $estatisticaVendas[$index]['totalCartao'] = $estatisticaVendaCartao->ven_qtd_cartao;
+            $estatisticaVendas[$index]['totalPix'] = $estatisticaVendaPix->ven_qtd_pix;
             $estatisticaVendas[$index]['totalDinheiro'] = $estatisticaVendaDinheiro->ven_qtd_dinheiro;
             $estatisticaVendas[$index]['totalFiado'] = $estatisticaVendaFiado->ven_qtd_fiado;
             $estatisticaVendas[$index]['totalNormal'] = $estatisticaVendaNormal->ven_qtd_normal;
@@ -206,6 +212,7 @@ class VendaEntity
 
             $estatisticaVendaCartao = $vendaModel->buscaEstatisticasVendaCartao($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaDinheiro = $vendaModel->buscaEstatisticasVendaDinheiro($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
+            $estatisticaVendaPix = $vendaModel->buscaEstatisticasVendaPix($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaNormal = $vendaModel->buscaEstatisticasVendaNormal($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaFiado = $vendaModel->buscaEstatisticasVendaFiado($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
 
@@ -214,7 +221,9 @@ class VendaEntity
             $estatisticaVendas[$index]['valorTotalGanhos'] = $valoresVendas->ven_valor_lucro;
             $estatisticaVendas[$index]['valorTotalCartao'] = $estatisticaVendaCartao->ven_valor_cartao;
             $estatisticaVendas[$index]['valorTotalDinheiro'] = $estatisticaVendaDinheiro->ven_valor_dinheiro;
+            $estatisticaVendas[$index]['valorTotalPix'] = $estatisticaVendaPix->ven_valor_pix;
             $estatisticaVendas[$index]['totalCartao'] = $estatisticaVendaCartao->ven_qtd_cartao;
+            $estatisticaVendas[$index]['totalPix'] = $estatisticaVendaPix->ven_qtd_pix;
             $estatisticaVendas[$index]['totalDinheiro'] = $estatisticaVendaDinheiro->ven_qtd_dinheiro;
             $estatisticaVendas[$index]['totalFiado'] = $estatisticaVendaFiado->ven_qtd_fiado;
             $estatisticaVendas[$index]['totalNormal'] = $estatisticaVendaNormal->ven_qtd_normal;
@@ -245,6 +254,7 @@ class VendaEntity
             $listaVendas[$index]['ven_desconto'] = $venda->ven_desconto;
             $listaVendas[$index]['ven_total'] = $venda->ven_total;
             $listaVendas[$index]['ven_lucro'] = $venda->ven_lucro;
+            $listaVendas[$index]['ven_porcentagem_lucro'] = $venda->ven_porcentagem_lucro;
 
             $index++;
         }

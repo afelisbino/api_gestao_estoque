@@ -27,7 +27,7 @@ class AutenticacaoController extends BaseController
      */
     public function autenticarUsuario(): ResponseInterface
     {
-        $dadosLogin = $this->request?->getPost();
+        $dadosLogin = $this->request?->getJSON(true);
 
         if (empty($dadosLogin['usuarioNome'])) return $this->response->setStatusCode(200, 'Usuario não informado')->setJSON(['status' => false, 'msg' => 'Usuario não informado!']);
 

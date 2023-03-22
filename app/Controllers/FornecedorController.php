@@ -28,8 +28,8 @@ class FornecedorController extends BaseController
      */
     public function cadastrarFornecedor(): ResponseInterface
     {
-        $nomeFornecedor = $this->request?->getPost('nomeFornecedor');
-        $docFornecedor = $this->request?->getPost('documentoFornecedor');
+        $nomeFornecedor = $this->request?->getJsonVar('nomeFornecedor');
+        $docFornecedor = $this->request?->getJsonVar('documentoFornecedor');
 
         if (!$this->validateData(
             [

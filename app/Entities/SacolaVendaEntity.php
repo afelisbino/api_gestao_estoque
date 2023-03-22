@@ -30,7 +30,7 @@ class SacolaVendaEntity
         $this->{$name} = $value;
     }
 
-    public function adicionaItemSacolaVenda($itensSacola = [], int|null $vendaId = null)
+    public function adicionaItemSacolaVenda($itensSacola = [], $descontoVenda = 0, int|null $vendaId = null)
     {
         if (empty($itensSacola)) return ['status' => false, 'msg' => 'Nenhum item informado na venda!'];
 
@@ -40,7 +40,10 @@ class SacolaVendaEntity
         $vendaEntity = new VendaEntity(ven_id: $vendaId);
         $estoqueEntity = new EstoqueEntity();
 
-        $lucroVenda = 0;
+        $vendaModel = new VendaModel();
+
+        $valorLucroVenda = 0;
+        $porcentagemLucroVenda = 0;
 
         foreach ($itensSacola as $item) {
 
@@ -62,7 +65,8 @@ class SacolaVendaEntity
                 $buscaCustoProduto = $produtoEntity->buscarDadosProduto($produtoEntity);
 
                 if (!empty($buscaCustoProduto)) {
-                    $lucroVenda += $item['scl_sub_total'] - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd']);
+                    $valorLucroVenda += ($item['scl_sub_total'] - $descontoVenda) - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd']);
+                    $porcentagemLucroVenda += ((($item['scl_sub_total'] - $descontoVenda) - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd'])) / $item['scl_sub_total']);
                 }
 
                 $idItemSacola = $this->salvaItemSacola($this);
@@ -75,10 +79,10 @@ class SacolaVendaEntity
                 if (!$this->vinculaItemSacolaVenda($this)) return ['status' => false, 'msg' => "Falha ao vincular o item a venda, tente novamente!"];
             }
 
-            $vendaModel = new VendaModel();
             $vendaModel->save([
                 'ven_id' => $vendaEntity->__get('ven_id'),
-                'ven_lucro' => $lucroVenda
+                'ven_lucro' => $valorLucroVenda,
+                'ven_margem_lucro' => ($porcentagemLucroVenda > 0) ? ($porcentagemLucroVenda) : 0
             ]);
         }
 
