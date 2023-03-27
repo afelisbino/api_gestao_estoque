@@ -30,7 +30,7 @@ class MovimentacaoCaixaEntity
     public function salvaMovimentacaoCaixaManual(MovimentacaoCaixaEntity $movimentacaoCaixaEntity)
     {
         $dadosMovimentacao = [
-            'mcx_data' => empty($movimentacaoCaixaEntity->__get('mcx_data')) ? date('Y-m-d H:i:s') : $movimentacaoCaixaEntity->__get('mcx_data') . " " . date('H:i:s'),
+            'mcx_data' => empty($movimentacaoCaixaEntity->__get('mcx_data')) ? date('Y-m-d') : date_format(date_create($movimentacaoCaixaEntity->__get('mcx_data')), 'Y-m-d'),
             'mcx_valor' => $movimentacaoCaixaEntity->__get('mcx_valor'),
             'mcx_tipo' => $movimentacaoCaixaEntity->__get('mcx_tipo'),
             'mcx_comentario' => $movimentacaoCaixaEntity->__get('mcx_comentario'),

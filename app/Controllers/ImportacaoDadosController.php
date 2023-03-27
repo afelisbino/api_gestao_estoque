@@ -10,6 +10,7 @@ use App\Entities\CategoriaEntity;
 use App\Entities\CodigoBarrasProdutoEntity;
 use App\Entities\EstoqueEntity;
 use App\Entities\FornecedorEntity;
+use App\Entities\MovimentacaoCaixaEntity;
 use App\Entities\ProdutoEntity;
 use App\Entities\SessaoUsuarioEntity;
 use App\Entities\VendaEntity;
@@ -52,7 +53,7 @@ class ImportacaoDadosController extends BaseController
 
         foreach ($dadosFornecedores as $fornecedor) {
 
-            $fornecedorEntity->__set('frn_nome', $fornecedor['frn_nome']);
+            $fornecedorEntity->__set('frn_nome', strtolower($fornecedor['frn_nome']));
             $fornecedorEntity->__set('frn_doc', $fornecedor['frn_doc']);
 
 
@@ -120,7 +121,7 @@ class ImportacaoDadosController extends BaseController
                 if (empty($buscaDadosFornecedor)) {
                     $retornoProduto[] = array('status' => false, 'msg' => "Fornecedor não encontrado!");
                 } else {
-                    $produtoEntity->__set('pro_nome', $produto['pro_nome']);
+                    $produtoEntity->__set('pro_nome', strtolower($produto['pro_nome']));
                     $produtoEntity->__set('pro_valor_venda', $produto['pro_valor_venda']);
                     $produtoEntity->__set('pro_preco_custo', 0);
                     $produtoEntity->__set('pro_descricao', $produto['pro_descricao']);
@@ -190,5 +191,27 @@ class ImportacaoDadosController extends BaseController
         }
 
         return $this->response->setStatusCode(200, "Sucesso")->setJSON($retornoVendas);
+    }
+
+    public function importaMovimentacoesManuais(): ResponseInterface
+    {
+        $dadosMovimentacao = $this->request?->getJSON(true);
+
+        $movimentacaoEntity = new MovimentacaoCaixaEntity();
+
+        $retornoMovimentacao = [];
+
+        foreach ($dadosMovimentacao as $movimentacao) {
+
+            $movimentacaoEntity->__set('mcx_data', $movimentacao['hcx_data']);
+            $movimentacaoEntity->__set('mcx_tipo', $movimentacao['hcx_tipo']);
+            $movimentacaoEntity->__set('mcx_valor', $movimentacao['hcx_vlr']);
+            $movimentacaoEntity->__set('mcx_comentario', $movimentacao['hcx_msg']);
+            $movimentacaoEntity->__set('empresa', $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa'));
+
+            $retornoMovimentacao[] = $movimentacaoEntity->salvaMovimentacaoCaixaManual($movimentacaoEntity);
+        }
+
+        return $this->response->setStatusCode(200, "Sucesso")->setJSON($retornoMovimentacao);
     }
 }
