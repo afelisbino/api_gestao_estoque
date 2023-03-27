@@ -153,6 +153,7 @@ $routes->group('api', static function ($routes) {
         $routes->post('fornecedor', 'ImportacaoDadosController::importaFornecedores', ['filter' => 'auth']);
         $routes->post('produto', 'ImportacaoDadosController::importaProdutos', ['filter' => 'auth']);
         $routes->post('venda', 'ImportacaoDadosController::importaVendas', ['filter' => 'auth']);
+        $routes->post('movimentacao', 'ImportacaoDadosController::importaMovimentacoesManuais', ['filter' => 'auth']);
     });
 });
 
