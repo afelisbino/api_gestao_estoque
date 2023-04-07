@@ -37,7 +37,7 @@ class FornecedorController extends BaseController
             ],
             [
                 'nomeFornecedor' => 'required|string',
-                'documentoFornecedor' => 'string|max_length[18]'
+                'documentoFornecedor' => 'string|max_length[18]|permit_empty'
             ]
         )) {
             return $this->response->setStatusCode(200, "Dados não informado")->setJSON(['status' => false, 'msg' => "Nome do fornecedor não informado!"]);
