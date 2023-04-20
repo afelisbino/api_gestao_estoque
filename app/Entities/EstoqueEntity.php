@@ -15,8 +15,8 @@ class EstoqueEntity
 
     public function __construct(
         private int|null $est_id = null,
-        private int $est_qtd_atual = 0,
-        private int $est_qtd_minimo = 0,
+        private float $est_qtd_atual = 0,
+        private float $est_qtd_minimo = 0,
         private ProdutoEntity $produto = new ProdutoEntity()
     ) {
     }
@@ -73,9 +73,9 @@ class EstoqueEntity
         $qtdRetirado = 0;
 
         if ($estoqueAtualProduto < $estoqueEntity->__get('est_qtd_atual')) {
-            $qtdAdicionado = (int) ($estoqueEntity->__get('est_qtd_atual') - $estoqueAtualProduto);
+            $qtdAdicionado = (float) ($estoqueEntity->__get('est_qtd_atual') - $estoqueAtualProduto);
         } else {
-            $qtdRetirado = (int) ($estoqueAtualProduto - $estoqueEntity->__get('est_qtd_atual'));
+            $qtdRetirado = (float) ($estoqueAtualProduto - $estoqueEntity->__get('est_qtd_atual'));
         }
 
         $historicoEstoqueModel = new HistoricoEstoqueModel();
@@ -223,8 +223,8 @@ class EstoqueEntity
         foreach ($dadosEstoque as $produto) {
             $estoqueEmpresa[$index]['pro_id'] = $produto->pro_token;
             $estoqueEmpresa[$index]['pro_nome'] = ucfirst($produto->pro_nome);
-            $estoqueEmpresa[$index]['pro_qtd_atual'] = (int) $produto->est_qtd_atual;
-            $estoqueEmpresa[$index]['pro_qtd_minimo'] = (int) $produto->est_qtd_minimo;
+            $estoqueEmpresa[$index]['pro_qtd_atual'] = (float) $produto->est_qtd_atual;
+            $estoqueEmpresa[$index]['pro_qtd_minimo'] = (float) $produto->est_qtd_minimo;
             $estoqueEmpresa[$index]['pro_disponivel'] = (bool) $produto->pro_disponivel;
 
             $codigosBarrasProduto = $codigosBarrasProdutoModel->buscaListaCodigoBarrasProduto($produto->pro_token);
@@ -258,11 +258,13 @@ class EstoqueEntity
         $estatisticasMovimentacaoEstoque = $historicoEstoqueModel->buscarEstatisticasHistoricoEstoque($empresaEntity->__get('emp_id'), $dataInicio, $dataFim);
 
         return [
-            'quantidade_estoque' => $estatisticasEstoque?->total_produto_estoque,
-            'quantidade_estoque_zerado' => $estatisticasEstoque?->total_zerado,
-            'quantidade_estoque_minimo' => $estatisticasEstoque?->total_minimo,
-            'quantidade_estoque_desativado' => $estatisticasEstoque?->total_desativados,
-            'produtos_vendidos' => $estatisticasProdutosMaisVendido,
+            'estatistica_estoque' => [
+                'quantidade_estoque' => $estatisticasEstoque?->total_produto_estoque,
+                'quantidade_estoque_zerado' => $estatisticasEstoque?->total_zerado,
+                'quantidade_estoque_minimo' => $estatisticasEstoque?->total_minimo,
+                'quantidade_estoque_desativado' => $estatisticasEstoque?->total_desativados,
+            ],
+            'produtos_mais_vendidos' => $estatisticasProdutosMaisVendido,
             'quantidade_movimentacoes' => $estatisticasMovimentacaoEstoque
         ];
     }
