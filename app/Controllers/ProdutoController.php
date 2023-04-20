@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Entities\CategoriaEntity;
 use App\Entities\CodigoBarrasProdutoEntity;
-use App\Entities\EmpresaEntity;
 use App\Entities\EstoqueEntity;
 use App\Entities\FornecedorEntity;
 use App\Entities\ProdutoEntity;
@@ -35,8 +34,8 @@ class ProdutoController extends BaseController
      * @param tokenCategoria string
      * @param tokenFornecedor string
      * @param codigoBarrasProduto array
-     * @param estoqueAtualProduto int
-     * @param estoqueMinimoProduto int
+     * @param estoqueAtualProduto float
+     * @param estoqueMinimoProduto float
      */
     public function cadastrarProduto(): ResponseInterface
     {
@@ -109,8 +108,8 @@ class ProdutoController extends BaseController
      * @param descricaoProduto string
      * @param tokenCategoria string
      * @param tokenFornecedor string
-     * @param estoqueAtualProduto int
-     * @param estoqueMinimoProduto int
+     * @param estoqueAtualProduto float
+     * @param estoqueMinimoProduto float
      */
     public function alterarDadosProduto(): ResponseInterface
     {
