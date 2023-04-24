@@ -122,8 +122,8 @@ $routes->group('api', static function ($routes) {
     });
 
     $routes->group("caixa", static function ($routes) {
-        $routes->group('movimentacao', static function ($routes) {
-            $routes->post('entrada', "MovimentacaoCaixaController::registraMovimentacao", ['filter' => 'auth']);
+        $routes->group('registrar', static function ($routes) {
+            $routes->post('movimentacao', "MovimentacaoCaixaController::registraMovimentacao", ['filter' => 'auth']);
         });
     });
 
