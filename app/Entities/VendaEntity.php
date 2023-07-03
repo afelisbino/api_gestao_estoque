@@ -3,6 +3,7 @@
 namespace App\Entities;
 
 use App\Libraries\Uuid;
+use App\Models\FormaPagamentoVendaModel;
 use App\Models\VendaModel;
 use CodeIgniter\I18n\Time;
 
@@ -22,6 +23,7 @@ class VendaEntity
         private float $ven_valor_compra = 0,
         private string|null $ven_tipo_pagamento = null,
         private float $ven_lucro = 0,
+        private bool $ven_emitir_nota = false,
         private EmpresaEntity $empresa = new EmpresaEntity()
     ) {
     }
@@ -45,13 +47,21 @@ class VendaEntity
         $this->ven_total = $this->calculaTotalVenda($dadosVenda['vendaValorCompra'], $dadosVenda['vendaValorDesconto']);
         $this->ven_tipo = "local";
         $this->ven_status = "finalizado";
-        $this->ven_tipo_pagamento = $dadosVenda['vendaTipoPagamento'];
+        $this->ven_tipo_pagamento = 'desabilitado';
         $this->ven_data = date('Y-m-d H:i:s');
         $this->empresa = $empresa;
 
         $idVenda = $this->salvaVenda($this);
 
         if ($idVenda === 0) return ['status' => false, 'msg' => "Falha ao salvar a venda, tente novamente!"];
+
+        if (!$this->salvaFormasPagamentoVenda($idVenda, $dadosVenda['formaPagamento'], $empresa)) {
+            log_message('ERROR', 'Falha ao salvar formas de pagamento: ' . json_encode($dadosVenda));
+            return [
+                'status' => false,
+                'msg' => 'Erro ao salvar a forma de pagamento da venda'
+            ];
+        }
 
         $sacolaVendaEntity = new SacolaVendaEntity();
 
@@ -109,7 +119,7 @@ class VendaEntity
         return $vendasFiadoAbertas;
     }
 
-    public function alteraStatusVendaFiadoParaPago(VendaEntity $vendaEntity)
+    public function alteraStatusVendaFiadoParaPago(VendaEntity $vendaEntity, array $formaPagamento)
     {
         if (!Uuid::is_valid($vendaEntity->__get('ven_token'))) return ['status' => false, 'msg' => "Token da venda inválido!"];
 
@@ -119,11 +129,20 @@ class VendaEntity
 
         if (empty($dadosVenda)) return ['status' => false, 'msg' => "Venda não encontrado!"];
 
+        if (!$this->salvaFormasPagamentoVenda($dadosVenda->ven_id, $formaPagamento['formaPagamentos'], $vendaEntity->__get('empresa'))) {
+            log_message('ERROR', 'Falha ao salvar formas de pagamento: ' . json_encode($dadosVenda));
+            return [
+                'status' => false,
+                'msg' => 'Erro ao salvar a forma de pagamento da venda'
+            ];
+        }
+
         if ($vendaModel->save([
             'ven_status' => 'finalizado',
             'ven_data' => date('Y-m-d H:i:s'),
             'ven_id' => $dadosVenda->ven_id,
-            'ven_tipo_pagamento' => $vendaEntity->__get('ven_tipo_pagamento')
+            'ven_tipo_pagamento' => 'desabilitado',
+            'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
         ])) return ['status' => true, 'msg' => "Venda fiado pago com sucesso!"];
 
         return ['status' => false, 'msg' => "Falha ao pagar venda, tente novamente"];
@@ -292,6 +311,7 @@ class VendaEntity
             'ven_fiado' => $vendaEntity->__get('ven_fiado'),
             'ven_tipo_pagamento' => $vendaEntity->__get('ven_tipo_pagamento'),
             'ven_tipo' => $vendaEntity->__get('ven_tipo'),
+            'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
             'emp_id' => $vendaEntity->__get('empresa')->__get('emp_id')
         ];
 
@@ -305,5 +325,28 @@ class VendaEntity
     private function calculaTotalVenda(float $valorCompra, float $valorDesconto): float
     {
         return $valorCompra - $valorDesconto;
+    }
+
+    private function salvaFormasPagamentoVenda(int $vendaId, array $listaFormasPagamentoVenda, EmpresaEntity $empresaEntity)
+    {
+
+        $formaPagamentoVendaModel = new FormaPagamentoVendaModel();
+
+        $tipoPagamentoEntity = new TipoPagamentoEntity(empresa: $empresaEntity);
+
+        $pagamentoSalvo = true;
+
+        foreach ($listaFormasPagamentoVenda as $pagamento) {
+
+            $tipoPagamentoId = $tipoPagamentoEntity->buscaTipoPagamentoId($pagamento['formaPagamentoToken'], $tipoPagamentoEntity->__get('empresa')->__get('emp_id'));
+
+            $pagamentoSalvo = $formaPagamentoVendaModel->save([
+                'ven_id' => $vendaId,
+                'fpv_valor_pago' => $pagamento['valorPago'],
+                'tpg_id' => $tipoPagamentoId
+            ]);
+        }
+
+        return $pagamentoSalvo;
     }
 }
