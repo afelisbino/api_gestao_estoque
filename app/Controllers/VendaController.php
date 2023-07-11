@@ -95,7 +95,7 @@ class VendaController extends BaseController
      */
     public function pagaVendaFiado()
     {
-        $dados = $this->request->getRawInput();
+        $dados = $this->request->getJSON(true);
 
         $vendaEntity = new VendaEntity(
             ven_token: $dados['tokenVenda'],

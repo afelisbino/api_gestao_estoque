@@ -81,7 +81,7 @@ class VendaEntity
         $this->ven_cliente = $dadosVenda['nomeCliente'];
         $this->ven_tipo = "local";
         $this->ven_status = "aberto";
-        $this->ven_tipo_pagamento = "dinheiro";
+        $this->ven_tipo_pagamento = "desabilitado";
         $this->ven_data = date('Y-m-d H:i:s');
         $this->empresa = $empresa;
 
@@ -129,7 +129,7 @@ class VendaEntity
 
         if (empty($dadosVenda)) return ['status' => false, 'msg' => "Venda não encontrado!"];
 
-        if (!$this->salvaFormasPagamentoVenda($dadosVenda->ven_id, $formaPagamento['formaPagamentos'], $vendaEntity->__get('empresa'))) {
+        if (!$this->salvaFormasPagamentoVenda($dadosVenda->ven_id, $formaPagamento, $vendaEntity->__get('empresa'))) {
             log_message('ERROR', 'Falha ao salvar formas de pagamento: ' . json_encode($dadosVenda));
             return [
                 'status' => false,
@@ -177,11 +177,11 @@ class VendaEntity
             'valorTotalVendas' => (float) $valoresEstatisticasVendas->ven_valor_total,
             'valorTotalLucro' => (float) $valoresEstatisticasVendas->ven_lucro,
             'porcentagemTotalLucro' => (float) $valoresEstatisticasVendas->ven_porcentagem_lucro,
-            'estatisticasVenda' => $this->recuperaEstatisticasVendasLocalEmpresaPorPeriodo($empresaEntity, $dataInicio, $dataFim)
+            'estatisticasVenda' => $this->recuperaEstatisticasVendasLocalEmpresa($empresaEntity, $dataInicio, $dataFim)
         ];
     }
 
-    private function recuperaEstatisticasVendasLocalEmpresaPorPeriodo(EmpresaEntity $empresaEntity, $dataInicio, $dataFim)
+    private function recuperaEstatisticasVendasLocalEmpresa(EmpresaEntity $empresaEntity, $dataInicio, $dataFim)
     {
         $vendaModel = new VendaModel();
 
@@ -191,61 +191,28 @@ class VendaEntity
         $index = 0;
 
         foreach ($dadosEstatisticasVendas as $valoresVendas) {
-            $dateTime = Time::parse($valoresVendas->data_venda, "America/Sao_Paulo");
-
-            $estatisticaVendaCartao = $vendaModel->buscaEstatisticasVendaCartao($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaDinheiro = $vendaModel->buscaEstatisticasVendaDinheiro($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaPix = $vendaModel->buscaEstatisticasVendaPix($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaNormal = $vendaModel->buscaEstatisticasVendaNormal($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
             $estatisticaVendaFiado = $vendaModel->buscaEstatisticasVendaFiado($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
 
-            $estatisticaVendas[$index]['dataLabel'] = $dateTime->toLocalizedString('dd/MM/YYYY');
-            $estatisticaVendas[$index]['valorTotalVendas'] = $valoresVendas->ven_valor_total;
-            $estatisticaVendas[$index]['valorTotalGanhos'] = $valoresVendas->ven_valor_lucro;
-            $estatisticaVendas[$index]['valorTotalCartao'] = $estatisticaVendaCartao->ven_valor_cartao;
-            $estatisticaVendas[$index]['valorTotalDinheiro'] = $estatisticaVendaDinheiro->ven_valor_dinheiro;
-            $estatisticaVendas[$index]['valorTotalPix'] = $estatisticaVendaPix->ven_valor_pix;
-            $estatisticaVendas[$index]['totalCartao'] = $estatisticaVendaCartao->ven_qtd_cartao;
-            $estatisticaVendas[$index]['totalPix'] = $estatisticaVendaPix->ven_qtd_pix;
-            $estatisticaVendas[$index]['totalDinheiro'] = $estatisticaVendaDinheiro->ven_qtd_dinheiro;
-            $estatisticaVendas[$index]['totalFiado'] = $estatisticaVendaFiado->ven_qtd_fiado;
-            $estatisticaVendas[$index]['totalNormal'] = $estatisticaVendaNormal->ven_qtd_normal;
-
-            $index++;
-        }
-
-        return $estatisticaVendas;
-    }
-
-    public function recuperaEstatisticasVendasLocalEmpresa(EmpresaEntity $empresaEntity)
-    {
-        $vendaModel = new VendaModel();
-
-        $dadosEstatisticasVendas = $vendaModel->buscaEstatisticasVendasLocalUltimosSeteDias($empresaEntity->__get('emp_id'));
-
-        $estatisticaVendas = [];
-        $index = 0;
-
-        foreach ($dadosEstatisticasVendas as $valoresVendas) {
             $dateTime = Time::parse($valoresVendas->data_venda, "America/Sao_Paulo");
 
-            $estatisticaVendaCartao = $vendaModel->buscaEstatisticasVendaCartao($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaDinheiro = $vendaModel->buscaEstatisticasVendaDinheiro($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaPix = $vendaModel->buscaEstatisticasVendaPix($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaNormal = $vendaModel->buscaEstatisticasVendaNormal($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-            $estatisticaVendaFiado = $vendaModel->buscaEstatisticasVendaFiado($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
-
             $estatisticaVendas[$index]['dataLabel'] = $dateTime->toLocalizedString('dd/MM/YYYY');
-            $estatisticaVendas[$index]['valorTotalVendas'] = $valoresVendas->ven_valor_total;
-            $estatisticaVendas[$index]['valorTotalGanhos'] = $valoresVendas->ven_valor_lucro;
-            $estatisticaVendas[$index]['valorTotalCartao'] = $estatisticaVendaCartao->ven_valor_cartao;
-            $estatisticaVendas[$index]['valorTotalDinheiro'] = $estatisticaVendaDinheiro->ven_valor_dinheiro;
-            $estatisticaVendas[$index]['valorTotalPix'] = $estatisticaVendaPix->ven_valor_pix;
-            $estatisticaVendas[$index]['totalCartao'] = $estatisticaVendaCartao->ven_qtd_cartao;
-            $estatisticaVendas[$index]['totalPix'] = $estatisticaVendaPix->ven_qtd_pix;
-            $estatisticaVendas[$index]['totalDinheiro'] = $estatisticaVendaDinheiro->ven_qtd_dinheiro;
-            $estatisticaVendas[$index]['totalFiado'] = $estatisticaVendaFiado->ven_qtd_fiado;
-            $estatisticaVendas[$index]['totalNormal'] = $estatisticaVendaNormal->ven_qtd_normal;
+            $estatisticaVendas[$index]['totalFiado'] = (int) $estatisticaVendaFiado->ven_qtd_fiado;
+            $estatisticaVendas[$index]['totalNormal'] = (int) $estatisticaVendaNormal->ven_qtd_normal;
+            $estatisticaVendas[$index]['valorTotalVendas'] = (float) $valoresVendas->ven_valor_total;
+            $estatisticaVendas[$index]['valorTotalGanhos'] = (float) $valoresVendas->ven_valor_lucro;
+
+            $formasPagamentoVenda = $vendaModel->buscaEstatisticasFormaPagamentos($empresaEntity->__get('emp_id'), $valoresVendas->data_venda);
+
+            $indexFormaPagamento = 0;
+
+            foreach ($formasPagamentoVenda as $pagamento) {
+                $estatisticaVendas[$index]['pagamentos'][$indexFormaPagamento]['forma'] = ucfirst($pagamento->tpg_nome);
+                $estatisticaVendas[$index]['pagamentos'][$indexFormaPagamento]['quantidade'] = (int) $pagamento->ven_qtd;
+                $estatisticaVendas[$index]['pagamentos'][$indexFormaPagamento]['total'] = (float) $pagamento->ven_valor;
+
+                $indexFormaPagamento++;
+            }
 
             $index++;
         }
@@ -268,7 +235,7 @@ class VendaEntity
             $listaVendas[$index]['ven_id'] = $venda->ven_token;
             $listaVendas[$index]['ven_data'] = $dateTime->toLocalizedString('dd/MM/YYYY HH:mm');
             $listaVendas[$index]['ven_tipo'] = $venda->ven_fiado == 0 ? "Normal" : "Fiado";
-            $listaVendas[$index]['ven_pagamento'] = ucfirst($venda->ven_tipo_pagamento);
+            $listaVendas[$index]['ven_pagamento'] = ucfirst($venda->tpg_nome);
             $listaVendas[$index]['ven_valor_compra'] = $venda->ven_valor_compra;
             $listaVendas[$index]['ven_desconto'] = $venda->ven_desconto;
             $listaVendas[$index]['ven_total'] = $venda->ven_total;
