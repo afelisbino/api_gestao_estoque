@@ -12,7 +12,7 @@ class SacolaVendaEntity
 
     public function __construct(
         private null|int $scl_id = null,
-        private int $scl_qtd = 0,
+        private float $scl_qtd = 0,
         private float $scl_sub_total = 0,
         private string | null $scl_token = null,
         private ProdutoEntity $produto = new ProdutoEntity(),
