@@ -147,7 +147,7 @@ class EstoqueEntity
         return $historicoEstoque;
     }
 
-    public function cadastraEntradaEstoqueProduto(EstoqueEntity $estoqueEntity, int $quantidadeAdicionado): array
+    public function cadastraEntradaEstoqueProduto(EstoqueEntity $estoqueEntity, float $quantidadeAdicionado): array
     {
         if (!Uuid::is_valid($estoqueEntity->__get('produto')->__get('pro_token'))) return ['status' => false, 'msg' => 'Token do produto inválido'];
 
@@ -178,7 +178,7 @@ class EstoqueEntity
         return ($salvaDadosEstoque) ? ['status' => true, 'msg' => "Estoque alterado com sucesso!"] : ['status' => false, 'msg' => "Falha ao alterar dados do estoque"];
     }
 
-    public function cadastraSaidaEstoqueProduto(EstoqueEntity $estoqueEntity, int $quantidadeRetirado): array
+    public function cadastraSaidaEstoqueProduto(EstoqueEntity $estoqueEntity, float $quantidadeRetirado): array
     {
         if (!Uuid::is_valid($estoqueEntity->__get('produto')->__get('pro_token'))) return ['status' => false, 'msg' => 'Token do produto inválido'];
 
