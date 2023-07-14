@@ -38,7 +38,17 @@ class EmpresaEntity
             'emp_ativo' => $empresaEntity->__get('emp_ativo')
         ];
 
-        return $empresaModel->salvarNovaEmpresa($dadosEmpresa);
+        if ($empresaModel->save($dadosEmpresa)) {
+            $empresaEntity->__set('emp_id', $empresaModel->getInsertID());
+
+            $tipoPagamentoEntity = new TipoPagamentoEntity(empresa: $empresaEntity);
+
+            $tipoPagamentoEntity->cadastraFormasPagamentoPadrao($tipoPagamentoEntity->__get('empresa'));
+
+            return ['status' => true, 'msg' => "Empresa salvo com sucesso!"];
+        }
+
+        return ['status' => false, 'msg' => "Falha ao salvar nova empresa", 'error' => $empresaModel->errors()];
     }
 
     public function alterarDadosEmpresa(EmpresaEntity $empresaEntity)
@@ -57,5 +67,14 @@ class EmpresaEntity
         ];
 
         return $empresaModel->salvarAlteracoesEmpresa($dados);
+    }
+
+    public function listarEmpresasAtivas()
+    {
+        $empresaModel = new EmpresaModel();
+
+        $listaEmpresaAtivo = $empresaModel->where('emp_ativo', 1)->find();
+
+        return $listaEmpresaAtivo;
     }
 }

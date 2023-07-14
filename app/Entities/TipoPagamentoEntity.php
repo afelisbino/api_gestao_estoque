@@ -37,9 +37,25 @@ class TipoPagamentoEntity
       $tipoPagamentoModel->where('tpg_token', $tokenTipoPagamento)->where('emp_id', $empresaId)->findColumn('tpg_id');
   }
 
+  public function buscaTipoPagamentoIdPorCategoria($nomeTipoPagamento, $categoriaPagamento, $empresaId)
+  {
+    $tipoPagamentoModel = new TipoPagamentoModel();
+
+    return $tipoPagamentoModel
+      ->where('tpg_categoria_pagamento', $categoriaPagamento)
+      ->where('tpg_nome', $nomeTipoPagamento)
+      ->where('tpg_ativo', 1)
+      ->where('emp_id', $empresaId)
+      ->findColumn('tpg_token');
+  }
+
   public function cadastraNovoTipoPagamento(TipoPagamentoEntity $tipoPagamentoEntity)
   {
     $tipoPagamentoModel = new TipoPagamentoModel();
+
+    if ($tipoPagamentoModel->existeCadastroTipoPagamentoEmpresa($tipoPagamentoEntity->__get('tpg_categoria_pagamento'), $tipoPagamentoEntity->__get('empresa')->__get('emp_id'))) {
+      return ['status' => false, 'msg' => 'Tipo de pagamento já existe'];
+    }
 
     $salvaTipoPagamento = $tipoPagamentoModel->save([
       'tpg_nome' => $tipoPagamentoEntity->__get('tpg_nome'),
@@ -185,5 +201,42 @@ class TipoPagamentoEntity
         'nome' => 'Outros',
       ]
     ];
+  }
+
+  public function cadastraFormasPagamentoPadrao(EmpresaEntity $empresaEntity)
+  {
+    $log['dinheiro'] = $this->cadastraNovoTipoPagamento(new TipoPagamentoEntity(
+      tpg_nome: 'Dinheiro',
+      tpg_token: Uuid::v4(),
+      tpg_ativo: 1,
+      tpg_categoria_pagamento: '01',
+      empresa: $empresaEntity
+    ));
+
+    $log['credito'] = $this->cadastraNovoTipoPagamento(new TipoPagamentoEntity(
+      tpg_nome: 'Crédito',
+      tpg_token: Uuid::v4(),
+      tpg_ativo: 1,
+      tpg_categoria_pagamento: '03',
+      empresa: $empresaEntity
+    ));
+
+    $log['debito'] = $this->cadastraNovoTipoPagamento(new TipoPagamentoEntity(
+      tpg_nome: 'Débito',
+      tpg_token: Uuid::v4(),
+      tpg_ativo: 1,
+      tpg_categoria_pagamento: '04',
+      empresa: $empresaEntity
+    ));
+
+    $log['pix'] = $this->cadastraNovoTipoPagamento(new TipoPagamentoEntity(
+      tpg_nome: 'Pix',
+      tpg_token: Uuid::v4(),
+      tpg_ativo: 1,
+      tpg_categoria_pagamento: '99',
+      empresa: $empresaEntity
+    ));
+
+    return $log;
   }
 }
