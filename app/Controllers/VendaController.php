@@ -98,12 +98,26 @@ class VendaController extends BaseController
         $dados = $this->request->getJSON(true);
 
         $vendaEntity = new VendaEntity(
-            ven_token: $dados['tokenVenda'],
             empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')
         );
 
+        $statusPagamentoVenda = false;
+
+        foreach ($dados['tokenVenda'] as $venda) {
+            $vendaEntity->__set('ven_token', $venda);
+            $pagaVenda = $vendaEntity->alteraStatusVendaFiadoParaPago($vendaEntity, $dados['formaPagamento']);
+
+            $statusPagamentoVenda = $pagaVenda['status'];
+        }
+
         return $this->response->setStatusCode(200, "Sucesso")->setJSON(
-            $vendaEntity->alteraStatusVendaFiadoParaPago($vendaEntity, $dados['formaPagamento'])
+            $statusPagamentoVenda ? array(
+                'status' => $statusPagamentoVenda,
+                'msg' => "Vendas pago com sucesso!"
+            ) : array(
+                'status' => $statusPagamentoVenda,
+                'msg' => 'Falha ao pagar vendas fiado'
+            )
         );
     }
 }
