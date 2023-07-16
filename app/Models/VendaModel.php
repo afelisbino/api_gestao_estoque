@@ -334,4 +334,13 @@ class VendaModel extends Model
 
         return $this->get()->getRow();
     }
+
+    public function buscaListaVendasEmpresa(int $empresaId)
+    {
+        $this->select('ven_id, ven_total, ven_tipo_pagamento');
+        $this->where('emp_id', $empresaId);
+        $this->whereNotIn('ven_tipo_pagamento', ['desabilitado']);
+
+        return $this->get()->getResult();
+    }
 }

@@ -42,4 +42,14 @@ class TipoPagamentoModel extends Model
   protected $allowedFields = ['tpg_nome', 'tpg_token', 'tpg_ativo', 'tpg_categoria_pagamento', 'emp_id'];
 
   protected $useTimestamps = false;
+
+  public function existeCadastroTipoPagamentoEmpresa(string $categoriaPagamento, int $empresaId): bool
+  {
+    $this->where('tpg_categoria_pagamento', $categoriaPagamento);
+    $this->where('emp_id', $empresaId);
+
+    $existeTipoPagamento = $this->get()->getRow();
+
+    return empty($existeTipoPagamento) ? false : true;
+  }
 }
