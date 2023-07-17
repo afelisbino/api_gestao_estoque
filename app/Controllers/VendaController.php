@@ -30,8 +30,8 @@ class VendaController extends BaseController
     /**
      * @param vendaValorCompra float
      * @param vendaValorDesconto float
+     * @param vendaTipoPagamento string
      * @param itens array
-     * @param formaPagamento array
      * @param pro_id string
      * @param scl_qtd int
      * @param scl_sub_total float
@@ -91,19 +91,16 @@ class VendaController extends BaseController
     }
     /**
      * @param tokenVenda string
-     * @param formaPagamento array
+     * @param tipoPagamento string
      */
     public function pagaVendaFiado()
     {
-        $dados = $this->request->getJSON(true);
+        $dados = $this->request->getRawInput();
 
-        $vendaEntity = new VendaEntity(
-            ven_token: $dados['tokenVenda'],
-            empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')
-        );
+        $vendaEntity = new VendaEntity(ven_token: $dados['tokenVenda'], ven_tipo_pagamento: $dados['tipoPagamento'], empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa'));
 
         return $this->response->setStatusCode(200, "Sucesso")->setJSON(
-            $vendaEntity->alteraStatusVendaFiadoParaPago($vendaEntity, $dados['formaPagamento'])
+            $vendaEntity->alteraStatusVendaFiadoParaPago($vendaEntity)
         );
     }
 }

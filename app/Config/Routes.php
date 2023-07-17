@@ -155,14 +155,6 @@ $routes->group('api', static function ($routes) {
         $routes->post('venda', 'ImportacaoDadosController::importaVendas', ['filter' => 'auth']);
         $routes->post('movimentacao', 'ImportacaoDadosController::importaMovimentacoesManuais', ['filter' => 'auth']);
     });
-
-    $routes->group('tipo_pagamento', static function ($routes) {
-        $routes->get('categorias', 'TipoPagamentoController::buscaListaCategoriaTipoPgamento', ['filter' => 'auth']);
-        $routes->post('cadastrar', 'TipoPagamentoController::novoTipoPagamento', ['filter' => 'auth']);
-        $routes->put('atualizar', 'TipoPagamentoController::alterarTipoPagamento', ['filter' => 'auth']);
-        $routes->patch('alterar_status', 'TipoPagamentoController::alterarStatusTipoPagamento', ['filter' => 'auth']);
-        $routes->get('listar', 'TipoPagamentoController::buscaListaTipoPagamento', ['filter' => 'auth']);
-    });
 });
 
 /*
