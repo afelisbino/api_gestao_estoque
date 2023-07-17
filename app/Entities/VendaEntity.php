@@ -48,7 +48,7 @@ class VendaEntity
         $this->ven_tipo = "local";
         $this->ven_status = "finalizado";
         $this->ven_tipo_pagamento = 'desabilitado';
-        $this->ven_data = date('Y-m-d H:i:s');
+        $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
         $idVenda = $this->salvaVenda($this);
@@ -82,7 +82,7 @@ class VendaEntity
         $this->ven_tipo = "local";
         $this->ven_status = "aberto";
         $this->ven_tipo_pagamento = "desabilitado";
-        $this->ven_data = date('Y-m-d H:i:s');
+        $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
         $idVenda = $this->salvaVenda($this);
@@ -139,7 +139,7 @@ class VendaEntity
 
         if ($vendaModel->save([
             'ven_status' => 'finalizado',
-            'ven_data' => date('Y-m-d H:i:s'),
+            'ven_data' => Time::now(locale: 'America/Sao_Paulo'),
             'ven_id' => $dadosVenda->ven_id,
             'ven_tipo_pagamento' => 'desabilitado',
             'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
