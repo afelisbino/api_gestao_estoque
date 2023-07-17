@@ -45,7 +45,7 @@ class EstoqueEntity
 
             $historicoEstoqueModel->save([
                 'hsp_tipo' => 'entrada',
-                'hsp_data' => date('Y-m-d H:i:s'),
+                'hsp_data' => Time::now(locale: 'America/Sao_Paulo'),
                 'hsp_qtd_registro' => $estoqueEntity->__get('est_qtd_atual'),
                 'hsp_qtd_antigo' => 0,
                 'hsp_qtd_atual' => $estoqueEntity->__get('est_qtd_atual'),
@@ -82,7 +82,7 @@ class EstoqueEntity
 
         $historicoEstoqueModel->save([
             'hsp_tipo' => $qtdAdicionado === 0 ? "saida" : "entrada",
-            'hsp_data' => date('Y-m-d H:i:s'),
+            'hsp_data' => Time::now(locale: 'America/Sao_Paulo'),
             'hsp_qtd_registro' => $qtdAdicionado === 0 ? $qtdRetirado : $qtdAdicionado,
             'hsp_qtd_antigo' => $estoqueAtualProduto,
             'hsp_qtd_atual' => $estoqueEntity->__get('est_qtd_atual'),
@@ -163,7 +163,7 @@ class EstoqueEntity
 
         $historicoEstoqueModel->save([
             'hsp_tipo' => "entrada",
-            'hsp_data' => date('Y-m-d H:i:s'),
+            'hsp_data' => Time::now(locale: 'America/Sao_Paulo'),
             'hsp_qtd_registro' => $quantidadeAdicionado,
             'hsp_qtd_antigo' => $recuperaDadosEstoque->est_qtd_atual,
             'hsp_qtd_atual' => ($recuperaDadosEstoque->est_qtd_atual + $quantidadeAdicionado),
@@ -194,7 +194,7 @@ class EstoqueEntity
 
         $historicoEstoqueModel->save([
             'hsp_tipo' => "saida",
-            'hsp_data' => date('Y-m-d H:i:s'),
+            'hsp_data' => Time::now(locale: 'America/Sao_Paulo'),
             'hsp_qtd_registro' => $quantidadeRetirado,
             'hsp_qtd_antigo' => $recuperaDadosEstoque->est_qtd_atual,
             'hsp_qtd_atual' => ($recuperaDadosEstoque->est_qtd_atual > 0) ? ($recuperaDadosEstoque->est_qtd_atual - $quantidadeRetirado) : 0,
