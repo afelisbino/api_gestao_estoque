@@ -65,19 +65,8 @@ class SacolaVendaEntity
                 $buscaCustoProduto = $produtoEntity->buscarDadosProduto($produtoEntity);
 
                 if (!empty($buscaCustoProduto)) {
-                    $valorLucroVenda += $this->calculaLucroItemVenda(
-                        $item['scl_sub_total'],
-                        $descontoVenda,
-                        $buscaCustoProduto['pro_preco_custo'],
-                        $item['scl_qtd']
-                    );
-
-                    $porcentagemLucroVenda += $this->calculaPorcentagemLucroItemVenda(
-                        $item['scl_sub_total'],
-                        $descontoVenda,
-                        $buscaCustoProduto['pro_preco_custo'],
-                        $item['scl_qtd']
-                    );
+                    $valorLucroVenda += ($item['scl_sub_total'] - $descontoVenda) - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd']);
+                    $porcentagemLucroVenda += ((($item['scl_sub_total'] - $descontoVenda) - ($buscaCustoProduto['pro_preco_custo'] * $item['scl_qtd'])) / $item['scl_sub_total']);
                 }
 
                 $idItemSacola = $this->salvaItemSacola($this);
@@ -98,16 +87,6 @@ class SacolaVendaEntity
         }
 
         return ['status' => true, 'msg' => "Venda registrada com sucesso!"];
-    }
-
-    private function calculaLucroItemVenda(float $descontoVenda = 0, float $subTotal = 0, float $custoItem = 0, float $qtdComprado = 0): float
-    {
-        return ($subTotal - $descontoVenda) - ($custoItem * $qtdComprado);
-    }
-
-    private function calculaPorcentagemLucroItemVenda(float $descontoVenda = 0, float $subTotal = 0, float $custoItem = 0, float $qtdComprado = 0): float
-    {
-        return ((($subTotal - $descontoVenda) - ($custoItem * $qtdComprado)) / $subTotal);
     }
 
     public function listaItensVenda(VendaEntity $vendaEntity)
