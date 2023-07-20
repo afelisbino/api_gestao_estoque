@@ -100,16 +100,6 @@ class SacolaVendaEntity
         return ['status' => true, 'msg' => "Venda registrada com sucesso!"];
     }
 
-    private function calculaLucroItemVenda(float $descontoVenda = 0, float $subTotal = 0, float $custoItem = 0, float $qtdComprado = 0): float
-    {
-        return ($subTotal - $descontoVenda) - ($custoItem * $qtdComprado);
-    }
-
-    private function calculaPorcentagemLucroItemVenda(float $descontoVenda = 0, float $subTotal = 0, float $custoItem = 0, float $qtdComprado = 0): float
-    {
-        return ((($subTotal - $descontoVenda) - ($custoItem * $qtdComprado)) / $subTotal);
-    }
-
     public function listaItensVenda(VendaEntity $vendaEntity)
     {
 

@@ -130,8 +130,8 @@ class VendaModel extends Model
         $this->where('ven_tipo', 'local');
         $this->where($periodoFiltro);
 
-        $this->orderBy('ven_data', 'ASC');
-        $this->groupBy("data_venda");
+        $this->orderBy('ven_data', 'DESC');
+        $this->groupBy("date_format(ven_data, '%Y-%m-%d')");
 
         return $this->get()->getResult();
     }
@@ -160,20 +160,46 @@ class VendaModel extends Model
         return $this->get()->getRow();
     }
 
-    public function buscaEstatisticasFormaPagamentos($empresaId, $dataVenda)
+    public function buscaEstatisticasVendaCartao($empresaId, $data)
     {
-        $this->select('tipo_pagamento.tpg_nome');
-        $this->selectSum('venda.ven_total', "ven_valor");
-        $this->selectCount('venda.ven_id', "ven_qtd");
-        $this->join('forma_pagamento_venda', 'venda.ven_id = forma_pagamento_venda.ven_id', 'inner');
-        $this->join('tipo_pagamento', 'forma_pagamento_venda.tpg_id = tipo_pagamento.tpg_id');
-        $this->where('venda.emp_id', $empresaId);
+
+        $this->selectSum('ven_total', "ven_valor_cartao");
+        $this->selectCount('*', "ven_qtd_cartao");
+        $this->where('emp_id', $empresaId);
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
-        $this->where("date_format(ven_data, '%Y-%m-%d')", $dataVenda);
-        $this->groupBy('tpg_nome');
+        $this->where('ven_tipo_pagamento', 'cartao');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
 
-        return $this->get()->getResult();
+        return $this->get()->getRow();
+    }
+
+    public function buscaEstatisticasVendaDinheiro($empresaId, $data)
+    {
+
+        $this->selectSum('ven_total', "ven_valor_dinheiro");
+        $this->selectCount('*', "ven_qtd_dinheiro");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_tipo_pagamento', 'dinheiro');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
+    }
+
+    public function buscaEstatisticasVendaPix($empresaId, $data)
+    {
+
+        $this->selectSum('ven_total', "ven_valor_pix");
+        $this->selectCount('*', "ven_qtd_pix");
+        $this->where('emp_id', $empresaId);
+        $this->where('ven_status', 'finalizado');
+        $this->where('ven_tipo', 'local');
+        $this->where('ven_tipo_pagamento', 'pix');
+        $this->where("date_format(ven_data, '%Y-%m-%d')", $data);
+
+        return $this->get()->getRow();
     }
 
     public function buscaListaVendasLocalFinalizadaEmpresaPorPeriodo($dataInicio, $dataFim, $empresaId)
@@ -186,11 +212,9 @@ class VendaModel extends Model
             "ven_lucro"
         );
         $this->selectSum('ven_margem_lucro', 'ven_porcentagem_lucro');
-        $this->join('forma_pagamento_venda', 'venda.ven_id = forma_pagamento_venda.ven_id', 'inner');
-        $this->join('tipo_pagamento', 'forma_pagamento_venda.tpg_id = tipo_pagamento.tpg_id');
         $this->where('ven_status', 'finalizado');
         $this->where('ven_tipo', 'local');
-        $this->where('venda.emp_id', $empresaId);
+        $this->where('emp_id', $empresaId);
         $this->where($periodoFiltro);
         $this->groupBy('venda.ven_id');
         $this->orderBy('ven_data', 'ASC');
