@@ -12,7 +12,7 @@ class EmpresaModel extends Model
     protected $useAutoIncrement = true;
 
     protected $returnType     = 'array';
-    protected $useSoftDeletes = true;
+    protected $useSoftDeletes = false;
 
     protected $allowedFields = ['emp_doc', 'emp_nome', 'emp_ativo', 'emp_token'];
 
