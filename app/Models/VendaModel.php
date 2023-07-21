@@ -118,7 +118,7 @@ class VendaModel extends Model
 
     public function buscaEstatisticasVendasLocalPeriodo($dataInicio, $dataFim, $empresaId)
     {
-        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between '" . $dataInicio . "' and '" . $dataFim . "'";
+        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "','%Y-%m-%d') and date_format('" . $dataFim . "','%Y-%m-%d')";
 
         $this->select("date_format(ven_data, '%Y-%m-%d') as data_venda");
         $this->selectSum('ven_total', "ven_valor_total");
@@ -178,7 +178,7 @@ class VendaModel extends Model
 
     public function buscaListaVendasLocalFinalizadaEmpresaPorPeriodo($dataInicio, $dataFim, $empresaId)
     {
-        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between '" . $dataInicio . "' and '" . $dataFim . "'";
+        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "','%Y-%m-%d') and date_format('" . $dataFim . "','%Y-%m-%d')";
 
         $this->select();
         $this->selectSum(
@@ -247,7 +247,7 @@ class VendaModel extends Model
         $periodoFiltro = "date_format(ven_data, '%Y-%m-%d) = " . date('Y-m-d');
 
         if (!empty($dataInicio) && !empty($dataFim)) {
-            $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between '" . $dataInicio . "' and '" . $dataFim . "'";
+            $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "','%Y-%m-%d') and date_format('" . $dataFim . "','%Y-%m-%d')";
         }
 
         $this->select("date_format(ven_data, '%Y-%m-%d') as ven_data_periodo");
@@ -307,10 +307,10 @@ class VendaModel extends Model
 
     public function buscaValoresLucroReceitaVendasFinalizadasPeriodo($dataInicio, $dataFim, $empresaId)
     {
-        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d) = " . date('Y-m-d');
+        $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') = " . date('Y-m-d');
 
         if (!empty($dataInicio) && !empty($dataFim)) {
-            $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between '" . $dataInicio . "' and '" . $dataFim . "'";
+            $periodoFiltro = "date_format(ven_data, '%Y-%m-%d') between date_format('" . $dataInicio . "','%Y-%m-%d') and date_format('" . $dataFim . "','%Y-%m-%d')";
         }
 
         $this->selectSum(
@@ -333,5 +333,14 @@ class VendaModel extends Model
         $this->where('emp_id', $empresaId);
 
         return $this->get()->getRow();
+    }
+
+    public function buscaListaVendasEmpresa(int $empresaId)
+    {
+        $this->select('ven_id, ven_total, ven_tipo_pagamento');
+        $this->where('emp_id', $empresaId);
+        $this->whereNotIn('ven_tipo_pagamento', ['desabilitado']);
+
+        return $this->get()->getResult();
     }
 }

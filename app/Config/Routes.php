@@ -163,6 +163,11 @@ $routes->group('api', static function ($routes) {
         $routes->patch('alterar_status', 'TipoPagamentoController::alterarStatusTipoPagamento', ['filter' => 'auth']);
         $routes->get('listar', 'TipoPagamentoController::buscaListaTipoPagamento', ['filter' => 'auth']);
     });
+
+    $routes->group('servico', static function ($routes) {
+        $routes->post('forma_pagamento_padrao', 'ServicoController::criarFormasPagamentoPadraoEmpresas');
+        $routes->post('correcao_forma_pagamento_venda', 'ServicoController::corrigiFormasPagamentoVendasExistente');
+    });
 });
 
 /*

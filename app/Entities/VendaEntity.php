@@ -48,7 +48,7 @@ class VendaEntity
         $this->ven_tipo = "local";
         $this->ven_status = "finalizado";
         $this->ven_tipo_pagamento = 'desabilitado';
-        $this->ven_data = date('Y-m-d H:i:s');
+        $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
         $idVenda = $this->salvaVenda($this);
@@ -82,7 +82,7 @@ class VendaEntity
         $this->ven_tipo = "local";
         $this->ven_status = "aberto";
         $this->ven_tipo_pagamento = "desabilitado";
-        $this->ven_data = date('Y-m-d H:i:s');
+        $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
         $idVenda = $this->salvaVenda($this);
@@ -139,7 +139,7 @@ class VendaEntity
 
         if ($vendaModel->save([
             'ven_status' => 'finalizado',
-            'ven_data' => date('Y-m-d H:i:s'),
+            'ven_data' => Time::now(locale: 'America/Sao_Paulo'),
             'ven_id' => $dadosVenda->ven_id,
             'ven_tipo_pagamento' => 'desabilitado',
             'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
@@ -315,5 +315,46 @@ class VendaEntity
         }
 
         return $pagamentoSalvo;
+    }
+
+    public function buscaListaVendaEmpresaTipoPagamento(EmpresaEntity $empresa)
+    {
+        $vendaModel = new VendaModel();
+
+        return $vendaModel->buscaListaVendasEmpresa($empresa->__get('emp_id'));
+    }
+
+    public function alteraTipoPagamentoVendaParaDesabilitado(int $vendaId)
+    {
+        $vendaModel = new VendaModel();
+
+        return $vendaModel->save([
+            'ven_id' => $vendaId,
+            'ven_tipo_pagamento' => 'desabilitado'
+        ]);
+    }
+
+    public function atualizaFormasPagamentoVendas(int $vendaId, string $tipoPagamento, float $valorPago, EmpresaEntity $empresaEntity)
+    {
+        $tipoPagamentoEntity = new TipoPagamentoEntity(empresa: $empresaEntity);
+
+        $tiposPagamentos['dinheiro'] = ['nome' => 'Dinheiro', 'codigo' => '01'];
+        $tiposPagamentos['cartao'] = ['nome' => 'Débito', 'codigo' => '04'];
+        $tiposPagamentos['pix'] = ['nome' => 'Pix', 'codigo' => '99'];
+
+        $tokenTipoPagamento = $tipoPagamentoEntity->buscaTipoPagamentoIdPorCategoria(
+            $tiposPagamentos[strtolower($tipoPagamento)]['nome'],
+            $tiposPagamentos[strtolower($tipoPagamento)]['codigo'],
+            $empresaEntity->__get('emp_id')
+        );
+
+        $formasPagamentoVenda = [
+            [
+                'formaPagamentoToken' => $tokenTipoPagamento,
+                'valorPago' => $valorPago,
+            ]
+        ];
+
+        return $this->salvaFormasPagamentoVenda($vendaId, $formasPagamentoVenda, $empresaEntity);
     }
 }

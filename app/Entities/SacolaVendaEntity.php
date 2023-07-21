@@ -66,15 +66,15 @@ class SacolaVendaEntity
 
                 if (!empty($buscaCustoProduto)) {
                     $valorLucroVenda += $this->calculaLucroItemVenda(
-                        $item['scl_sub_total'],
                         $descontoVenda,
+                        $item['scl_sub_total'],
                         $buscaCustoProduto['pro_preco_custo'],
                         $item['scl_qtd']
                     );
 
                     $porcentagemLucroVenda += $this->calculaPorcentagemLucroItemVenda(
-                        $item['scl_sub_total'],
                         $descontoVenda,
+                        $item['scl_sub_total'],
                         $buscaCustoProduto['pro_preco_custo'],
                         $item['scl_qtd']
                     );
