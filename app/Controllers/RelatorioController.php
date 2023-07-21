@@ -65,7 +65,7 @@ class RelatorioController extends BaseController
     {
         $vendaEntity = new VendaEntity();
 
-        return $this->response->setStatusCode("200", "Sucesso")->setJSON($vendaEntity->recuperaEstatisticasVendasLocalEmpresa($this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')));
+        return $this->response->setStatusCode("200", "Sucesso")->setJSON($vendaEntity->recuperaQuantidadeVendasLocalPorPeriodo($this->sessaoUsuarioEntity->__get('usuario')->__get('empresa'), DATA_SETE_DIAS_ATRAS, date('Y-m-d')));
     }
 
     public function buscaListaEstoqueEmpresa()
