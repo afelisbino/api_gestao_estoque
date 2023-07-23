@@ -14,7 +14,7 @@ class VendaModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_tipo_pagamento', 'ven_lucro', 'ven_margem_lucro', 'emp_id'];
+    protected $allowedFields = ['ven_data', 'ven_total', 'ven_desconto', 'ven_valor_compra', 'ven_fiado', 'ven_status', 'ven_cliente', 'ven_token', 'ven_tipo', 'ven_lucro', 'ven_margem_lucro', 'emp_id'];
 
     protected $useTimestamps = false;
 

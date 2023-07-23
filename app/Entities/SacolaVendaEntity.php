@@ -159,4 +159,29 @@ class SacolaVendaEntity
             'ven_id' => $sacolaVendaEntity->__get('venda')->__get('ven_id')
         ]);
     }
+
+    public function retornaItensVendaCanceladoParaEstoque(string $tokenVenda, $empresa): bool
+    {
+        $estoqueEntity = new EstoqueEntity();
+        $sacolaVendaModel = new SacolaVendaModel();
+
+        $itensSacolaVenda = $sacolaVendaModel->buscaListaItensVenda($tokenVenda, $empresa);
+
+        $log = [];
+
+        foreach ($itensSacolaVenda as $itemVenda) {
+            $estoqueEntity->__set(
+                'produto',
+                new ProdutoEntity(
+                    pro_id: $itemVenda->pro_id,
+                    pro_token: $itemVenda->pro_token
+                )
+            );
+            $log[] = $estoqueEntity->cadastraEntradaEstoqueProduto($estoqueEntity, $itemVenda->scl_qtd);
+        }
+
+        if (in_array(false, $log)) return false;
+
+        return true;
+    }
 }
