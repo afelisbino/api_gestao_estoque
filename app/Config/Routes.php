@@ -119,6 +119,8 @@ $routes->group('api', static function ($routes) {
                 $routes->post('fiado', "VendaController::cadastrarVendaLocalFiado", ['filter' => 'auth']);
             });
         });
+
+        $routes->put('cancelar', 'VendaController::cancelaVendaEmpresa', ['filter' => 'auth']);
     });
 
     $routes->group("caixa", static function ($routes) {
