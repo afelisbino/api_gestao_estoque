@@ -47,7 +47,6 @@ class VendaEntity
         $this->ven_total = $this->calculaTotalVenda($dadosVenda['vendaValorCompra'], $dadosVenda['vendaValorDesconto']);
         $this->ven_tipo = "local";
         $this->ven_status = "finalizado";
-        $this->ven_tipo_pagamento = 'desabilitado';
         $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
@@ -81,7 +80,6 @@ class VendaEntity
         $this->ven_cliente = $dadosVenda['nomeCliente'];
         $this->ven_tipo = "local";
         $this->ven_status = "aberto";
-        $this->ven_tipo_pagamento = "desabilitado";
         $this->ven_data = Time::now(locale: 'America/Sao_Paulo');
         $this->empresa = $empresa;
 
@@ -141,7 +139,6 @@ class VendaEntity
             'ven_status' => 'finalizado',
             'ven_data' => Time::now(locale: 'America/Sao_Paulo'),
             'ven_id' => $dadosVenda->ven_id,
-            'ven_tipo_pagamento' => 'desabilitado',
             'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
         ])) return ['status' => true, 'msg' => "Venda fiado pago com sucesso!"];
 
@@ -276,7 +273,6 @@ class VendaEntity
             'ven_valor_compra' => $vendaEntity->__get('ven_valor_compra'),
             'ven_desconto' => $vendaEntity->__get('ven_desconto'),
             'ven_fiado' => $vendaEntity->__get('ven_fiado'),
-            'ven_tipo_pagamento' => $vendaEntity->__get('ven_tipo_pagamento'),
             'ven_tipo' => $vendaEntity->__get('ven_tipo'),
             'ven_emitir_nota' => $vendaEntity->__get('ven_emitir_nota'),
             'emp_id' => $vendaEntity->__get('empresa')->__get('emp_id')
@@ -317,44 +313,20 @@ class VendaEntity
         return $pagamentoSalvo;
     }
 
-    public function buscaListaVendaEmpresaTipoPagamento(EmpresaEntity $empresa)
+    public function cancelaVenda(VendaEntity $vendaEntity)
     {
-        $vendaModel = new VendaModel();
+        $sacolaVendaEntity = new SacolaVendaEntity(venda: $vendaEntity);
 
-        return $vendaModel->buscaListaVendasEmpresa($empresa->__get('emp_id'));
-    }
+        if ($sacolaVendaEntity->retornaItensVendaCanceladoParaEstoque($vendaEntity->__get('ven_token'), $vendaEntity->__get('empresa')->__get('emp_id'))) {
+            $vendaModel = new VendaModel();
+            $venda = $vendaModel->buscaVendaPorToken($vendaEntity->__get('ven_token'), $vendaEntity->__get('empresa')->__get('emp_id'));
 
-    public function alteraTipoPagamentoVendaParaDesabilitado(int $vendaId)
-    {
-        $vendaModel = new VendaModel();
-
-        return $vendaModel->save([
-            'ven_id' => $vendaId,
-            'ven_tipo_pagamento' => 'desabilitado'
-        ]);
-    }
-
-    public function atualizaFormasPagamentoVendas(int $vendaId, string $tipoPagamento, float $valorPago, EmpresaEntity $empresaEntity)
-    {
-        $tipoPagamentoEntity = new TipoPagamentoEntity(empresa: $empresaEntity);
-
-        $tiposPagamentos['dinheiro'] = ['nome' => 'Dinheiro', 'codigo' => '01'];
-        $tiposPagamentos['cartao'] = ['nome' => 'Débito', 'codigo' => '04'];
-        $tiposPagamentos['pix'] = ['nome' => 'Pix', 'codigo' => '99'];
-
-        $tokenTipoPagamento = $tipoPagamentoEntity->buscaTipoPagamentoIdPorCategoria(
-            $tiposPagamentos[strtolower($tipoPagamento)]['nome'],
-            $tiposPagamentos[strtolower($tipoPagamento)]['codigo'],
-            $empresaEntity->__get('emp_id')
-        );
-
-        $formasPagamentoVenda = [
-            [
-                'formaPagamentoToken' => $tokenTipoPagamento,
-                'valorPago' => $valorPago,
-            ]
-        ];
-
-        return $this->salvaFormasPagamentoVenda($vendaId, $formasPagamentoVenda, $empresaEntity);
+            return $vendaModel->save([
+                'ven_id' => $venda->ven_id,
+                'ven_status' => 'cancelado'
+            ]);
+        } else {
+            return false;
+        }
     }
 }
