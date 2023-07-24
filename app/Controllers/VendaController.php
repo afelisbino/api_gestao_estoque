@@ -120,4 +120,23 @@ class VendaController extends BaseController
             )
         );
     }
+
+    /**
+     * @param tokenVenda string
+     */
+    public function cancelaVendaEmpresa()
+    {
+        $dados = $this->request->getJSON(true);
+
+        $vendaEntity = new VendaEntity(
+            ven_token: $dados['tokenVenda'],
+            empresa: $this->sessaoUsuarioEntity->__get('usuario')->__get('empresa')
+        );
+
+        if ($vendaEntity->cancelaVenda($vendaEntity)) {
+            return $this->response->setStatusCode(200, "Sucesso")->setJSON(['status' => true, 'msg' => "Venda cancelada com sucesso!"]);
+        }
+
+        return $this->response->setStatusCode(200, 'Sucesso')->setJSON(['status' => false, 'msg' => "Falha ao cancelar venda!"]);
+    }
 }
